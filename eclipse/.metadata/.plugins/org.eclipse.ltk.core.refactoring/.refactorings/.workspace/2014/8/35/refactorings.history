@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;SamsHauling/src/hs_err_pid23546.log&apos;" deleteContents="false" description="Delete resource &apos;SamsHauling/src/hs_err_pid23546.log&apos;" element1="/SamsHauling/src/hs_err_pid23546.log" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1409241651487"/>
+</session>
