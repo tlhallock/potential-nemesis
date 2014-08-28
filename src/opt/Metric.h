@@ -17,7 +17,7 @@ public:
 	Metric();
 	virtual ~Metric();
 
-	virtual Cost get_cost(const Solution &s) = 0;
+	virtual double get_cost(const Cost &c) = 0;
 };
 
 #endif /* METRIC_H_ */

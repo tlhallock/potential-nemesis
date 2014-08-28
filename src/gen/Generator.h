@@ -18,7 +18,7 @@ public:
 	Generator();
 	virtual ~Generator();
 
-	virtual Solution generate(const std::vector<Request>& requests, const Parameters &params) = 0;
+	virtual Solution *generate(const std::vector<Request>& requests, const Parameters &params) = 0;
 };
 
 #endif /* GENERATOR_H_ */

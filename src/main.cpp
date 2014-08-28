@@ -1,8 +1,7 @@
 
 #include "gen/generate.h"
 
-#include "Parameters.h"
-#include "gen/RandomNextGenerator.h"
+#include "opt/RandomGeneratorSolver.h"
 
 #include <iostream>
 #include <algorithm>
@@ -24,38 +23,11 @@ int main(int argc, char **argv)
 		std::cout << r << std::endl;
 	});
 
-	int num_serviced = 0;
-	int64_t time = 1000000;
+	RandomGeneratorSolver solver;
 
-	Route r;
+	Solution *s = solver.solve(requests, p);
 
-	RandomNextGenerator gen;
+	std::cout << "Optimal solution: " << *s << std::endl;
 
-	int count = 0;
-	for (;;)
-	{
-		if (count++ > 1000)
-		{
-			break;
-		}
-
-		Solution next = gen.generate(requests, p);
-
-		if (next.get_num_requests_serviced() <= num_serviced)
-		{
-			continue;
-		}
-
-		if (next.get_time_taken() >= time)
-		{
-			continue;
-		}
-
-		count = 0;
-
-		time = next.get_time_taken();
-		num_serviced = next.get_num_requests_serviced();
-
-		std::cout << "Found new solution: " << next << std::endl;
-	}
+	delete s;
 }

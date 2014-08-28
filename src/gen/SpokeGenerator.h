@@ -16,7 +16,7 @@ public:
 	SpokeGenerator();
 	virtual ~SpokeGenerator();
 
-	Solution generate(const std::vector<Request>& original_requests, const Parameters &params);
+	Solution *generate(const std::vector<Request>& original_requests, const Parameters &params);
 };
 
 #endif /* SPOKEGENERATOR_H_ */

@@ -10,7 +10,7 @@
 RandomNextGenerator::RandomNextGenerator() {}
 RandomNextGenerator::~RandomNextGenerator() {}
 
-Solution RandomNextGenerator::generate(const std::vector<Request>& original_requests, const Parameters &params)
+Solution *RandomNextGenerator::generate(const std::vector<Request>& original_requests, const Parameters &params)
 {
 	int size = original_requests.size();
 
@@ -21,11 +21,11 @@ Solution RandomNextGenerator::generate(const std::vector<Request>& original_requ
 	}
 
 	int num_drivers = params.get_num_drivers();
-	Solution s { num_drivers };
+	Solution *s = new Solution{ num_drivers };
 	// This is to ensure that solutions don't use the same requests twice...
 	for (int i = 0; i < num_drivers; i++)
 	{
-		generate(original_requests, s.get_route(i), serviced);
+		generate(original_requests, s->get_route(i), serviced);
 	}
 
 	free(serviced);

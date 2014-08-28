@@ -16,7 +16,7 @@ public:
 	RandomNextGenerator();
 	virtual ~RandomNextGenerator();
 
-	Solution generate(const std::vector<Request>& original_requests, const Parameters &params);
+	Solution *generate(const std::vector<Request>& original_requests, const Parameters &params);
 
 private:
 	void generate(const std::vector<Request>& original_requests, Route &output, bool *serviced);

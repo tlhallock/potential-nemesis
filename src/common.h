@@ -9,6 +9,7 @@
 #define COMMON_H_
 
 #include <inttypes.h>
+#include <climits>
 
 typedef int64_t sh_time_t;
 #define sh_time_max LONG_MAX

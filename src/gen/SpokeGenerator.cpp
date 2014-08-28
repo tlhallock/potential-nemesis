@@ -10,7 +10,7 @@
 SpokeGenerator::SpokeGenerator() {}
 SpokeGenerator::~SpokeGenerator() {}
 
-Solution SpokeGenerator::generate(const std::vector<Request>& original_requests, const Parameters& params)
+Solution *SpokeGenerator::generate(const std::vector<Request>& original_requests, const Parameters& params)
 {
-	return Solution {params.get_num_drivers()};
+	return new Solution {params.get_num_drivers()};
 }

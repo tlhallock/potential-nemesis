@@ -16,9 +16,10 @@ class Cost
 {
 public:
 	Cost(const Solution &s);
+	Cost();
 	~Cost();
 
-	bool is_better_than(const Cost &other);
+	bool is_better_than(const Cost *other);
 private:
 	int num_serviced;
 	sh_time_t time;
