@@ -12,9 +12,11 @@ class Parameters
 {
 public:
 	Parameters();
+
 	~Parameters();
 
 	int get_num_drivers() const;
+
 	int get_num_requests() const;
 };
 

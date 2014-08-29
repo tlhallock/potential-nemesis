@@ -7,8 +7,6 @@
 
 #include "Solution.h"
 
-
-
 Solution::Solution(int num_drivers)
 {
 	for (int i = 0; i < num_drivers; i++)
@@ -78,30 +76,4 @@ std::ostream& operator<<(std::ostream& os, const Solution& r)
 
 	return os;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

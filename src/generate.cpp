@@ -36,7 +36,7 @@ Operation genereate_operation()
 Request generate_request()
 {
 	sh_time_t time = rand() % sh_time_look_ahead;
-	return Request { generate_location(), genereate_operation(), time - 50, time + 50 };
+	return Request { generate_location(), genereate_operation(), time - sh_time_window, time + sh_time_window };
 }
 
 std::vector<Request> generate_requests(int num)
@@ -48,14 +48,4 @@ std::vector<Request> generate_requests(int num)
 	}
 
 	return requests;
-}
-
-std::vector<Location>* generate_landfills()
-{
-	std::vector<Location> *ret = new std::vector<Location>;
-	for (int i = 0; i < 2; i++)
-	{
-		ret->push_back(generate_location());
-	}
-	return ret;
 }

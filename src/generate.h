@@ -16,6 +16,4 @@ Request generate_request();
 
 std::vector<Request> generate_requests(int num);
 
-std::vector<Location>* generate_landfills();
-
 #endif

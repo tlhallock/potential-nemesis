@@ -17,10 +17,15 @@
 class Solver
 {
 public:
-	Solver();
+	Solver(const Parameters &p);
 	virtual ~Solver();
 
-	virtual Solution *solve(const std::vector<Request>& requests, const Parameters &p) = 0;
+	virtual Solution *solve(const std::vector<Request>& requests) = 0;
+	virtual std::string get_name() const = 0;
+
+	const Parameters get_params() const;
+protected:
+	const Parameters &p;
 };
 
 #endif /* SOLVER_H_ */

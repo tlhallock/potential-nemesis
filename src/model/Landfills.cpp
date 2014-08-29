@@ -7,7 +7,22 @@
 
 #include "model/Landfills.h"
 
-#include "gen/generate.h"
+#include "generate.h"
+
+#include "common.h"
+
+namespace
+{
+	std::vector<Location>* generate_landfills()
+	{
+		std::vector<Location> *ret = new std::vector<Location>;
+		for (int i = 0; i < NUM_LANDFILLS; i++)
+		{
+			ret->push_back(generate_location());
+		}
+		return ret;
+	}
+}
 
 std::vector<Location> &get_land_fills()
 {

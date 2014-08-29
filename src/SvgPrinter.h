@@ -10,6 +10,8 @@
 
 #include "Solution.h"
 
-void print_problem(const std::string filename, const std::vector<Request> &requests, const Solution *solution);
+void svg_print_requests(const std::string &filename, const std::vector<Request> &requests);
+
+void svg_print_solution(const std::string &filename, const Solution *solution);
 
 #endif /* SVGPRINTER_H_ */

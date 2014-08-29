@@ -8,15 +8,17 @@
 #ifndef RANDOMGENERATORSOLVER_H_
 #define RANDOMGENERATORSOLVER_H_
 
-#include "opt/Solver.h"
+#include "opt/ForDriverForStopSolver.h"
 
-class RandomGeneratorSolver : public Solver
+class RandomGeneratorSolver : public ForDriverForStopSolver
 {
 public:
-	RandomGeneratorSolver();
+	RandomGeneratorSolver(const Parameters &p);
 	virtual ~RandomGeneratorSolver();
 
-	Solution *solve(const std::vector<Request>& requests, const Parameters &p);
+	std::string get_name() const;
+protected:
+	int get_next_request(const std::vector<Request>& originals, std::vector<int> &possibles, const Solution *s, int driver);
 };
 
 #endif /* RANDOMGENERATORSOLVER_H_ */

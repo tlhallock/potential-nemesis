@@ -103,7 +103,7 @@ namespace
 
 	void print_requests(std::ofstream &svg_stream, const std::vector<Request> &solution)
 	{
-		std::for_each(solution.begin(), solution.end(), [&svg_stream](const Request &r)
+		foreach(solution, [&svg_stream](const Request &r)
 		{
 			print_request(svg_stream, r);
 		});
@@ -134,7 +134,7 @@ namespace
 
 	void print_land_fills(std::ofstream &svg_stream)
 	{
-		std::for_each(get_land_fills().begin(), get_land_fills().end(), [&svg_stream](const Location &l)
+		foreach(get_land_fills(), [&svg_stream](const Location &l)
 		{
 			print_letter(svg_stream, l, 'L');
 		});
@@ -154,22 +154,21 @@ namespace
 	}
 }
 
-void print_problem(const std::string filename, const std::vector<Request> &requests, const Solution *solution)
+void svg_print_requests(const std::string &filename, const std::vector<Request> &requests)
 {
-	{
-		std::ofstream svg_stream { filename + ".req.svg" };
-		print_preamble(svg_stream, "requests");
-		print_requests(svg_stream, requests);
-		print_land_fills(svg_stream);
-		// print staging areas
-		print_postamble(svg_stream);
-	}
+	std::ofstream svg_stream { filename + ".req.svg" };
+	print_preamble(svg_stream, "requests");
+	print_requests(svg_stream, requests);
+	print_land_fills(svg_stream);
+	// print staging areas
+	print_postamble(svg_stream);
+}
 
-	{
-		std::ofstream svg_stream { filename + ".sol.svg" };
-		print_preamble(svg_stream, "solution");
-		print_solution(svg_stream, *solution);
-		print_postamble(svg_stream);
-	}
+void svg_print_solution(const std::string &filename, const Solution *solution)
+{
+	std::ofstream svg_stream { filename + ".sol.svg" };
+	print_preamble(svg_stream, "solution");
+	print_solution(svg_stream, *solution);
+	print_postamble(svg_stream);
 }
 
