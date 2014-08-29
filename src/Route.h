@@ -31,6 +31,9 @@ public:
 	bool can_service_next(const Action &req) const;
 	void service_next(const Action *req);
 
+	int get_num_actions() const;
+	const Action &get_action(int index) const;
+
 	friend std::ostream& operator<<(std::ostream& os, const Route& r);
 private:
 	sh_time_t get_time_taken(const int i) const;

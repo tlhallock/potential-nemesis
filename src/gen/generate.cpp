@@ -1,6 +1,8 @@
 
 #include "generate.h"
 
+#include "common.h"
+
 #include <vector>
 #include <cstdlib>
 #include <algorithm>
@@ -9,7 +11,7 @@
 
 double generate_coord()
 {
-	return 100 * (rand() / (double) RAND_MAX);
+	return  DIM_MAX * (rand() / (double) RAND_MAX);
 }
 
 Location generate_location()
@@ -33,7 +35,7 @@ Operation genereate_operation()
 
 Request generate_request()
 {
-	sh_time_t time = rand() % 1000;
+	sh_time_t time = rand() % sh_time_look_ahead;
 	return Request { generate_location(), genereate_operation(), time - 50, time + 50 };
 }
 

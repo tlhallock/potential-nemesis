@@ -21,6 +21,8 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const Location& r);
 	sh_time_t get_time_to(const Location &l) const;
 
+	double get_x() const;
+	double get_y() const;
 protected:
 	virtual void append_to(std::ostream& os) const;
 private:

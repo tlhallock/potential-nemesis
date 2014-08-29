@@ -23,6 +23,10 @@ public:
 	Route &get_route(int index) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Solution& r);
+
+
+
+	void print_svg(const std::string &filename);
 private:
 	std::vector<Route *> routes;
 };

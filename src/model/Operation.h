@@ -19,6 +19,7 @@ typedef enum
 	UnStage,
 } Operation;
 
-std::string action_to_string(Operation o);
+std::string operation_to_string(Operation o);
+char operation_to_svg(Operation o);
 
 #endif /* OPERATION_H_ */

@@ -3,6 +3,8 @@
 
 #include "opt/RandomGeneratorSolver.h"
 
+#include "SvgPrinter.h"
+
 #include <iostream>
 #include <algorithm>
 
@@ -28,6 +30,8 @@ int main(int argc, char **argv)
 	Solution *s = solver.solve(requests, p);
 
 	std::cout << "Optimal solution: " << *s << std::endl;
+
+	print_problem("solution", requests, s);
 
 	delete s;
 }

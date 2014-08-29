@@ -28,4 +28,16 @@ sh_time_t Location::get_time_to(const Location& l) const
 	return (int64_t) sqrt(xd * xd + yd * yd);
 }
 
-void Location::append_to(std::ostream& os) const {}
+void Location::append_to(std::ostream& os) const
+{
+}
+
+double Location::get_x() const
+{
+	return x;
+}
+
+double Location::get_y() const
+{
+	return y;
+}
