@@ -12,8 +12,10 @@
 
 #include <vector>
 
-std::vector<Location> &get_land_fills();
-
-Location get_closest_landfill(const Location &l);
+class Landfill : public Location
+{
+	Landfill(double x, double y);
+	~Landfill();
+};
 
 #endif /* LANDFILLS_H_ */

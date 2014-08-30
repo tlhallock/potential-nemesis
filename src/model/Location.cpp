@@ -29,3 +29,8 @@ sh_time_t Location::get_time_to(const Location& l) const
 }
 
 void Location::append_to(std::ostream& os) const {}
+
+bool Location::is_same_location(const Location& other) const
+{
+	return x == other.x && y == other.y;
+}
