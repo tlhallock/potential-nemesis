@@ -6,47 +6,17 @@
  */
 
 #include "opt/RandomGeneratorSolver.h"
-#include "gen/RandomNextGenerator.h"
 #include "opt/Cost.h"
 
-RandomGeneratorSolver::RandomGeneratorSolver() {}
+RandomGeneratorSolver::RandomGeneratorSolver(const Parameters &p) : ForDriverForStopSolver {p} {}
 RandomGeneratorSolver::~RandomGeneratorSolver() {}
 
-Solution *RandomGeneratorSolver::solve(const std::vector<Request>& requests, const Parameters &p)
+std::string RandomGeneratorSolver::get_name() const
 {
-	RandomNextGenerator gen;
+	return "random";
+}
 
-	Solution *s = nullptr;
-	Cost *cost = nullptr;
-
-	int count = 0;
-	for (;;)
-	{
-		if (count++ > 1000)
-		{
-			break;
-		}
-
-		Solution *next = gen.generate(requests, p);
-		Cost *another = new Cost{*next};
-
-		if (!another->is_better_than(cost))
-		{
-			delete next;
-			delete another;
-			continue;
-		}
-
-		delete s;
-		s = next;
-		delete cost;
-		cost = another;
-
-		count = 0;
-
-		std::cout << "Found new solution: " << *next << std::endl;
-
-	}
-
-	return s;
+int RandomGeneratorSolver::get_next_request(const std::vector<Request>& originals, std::vector<int> &possibles, const Solution *s, int driver)
+{
+	return possibles.at(rand() % possibles.size());
 }

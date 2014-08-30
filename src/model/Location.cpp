@@ -34,3 +34,13 @@ bool Location::is_same_location(const Location& other) const
 {
 	return x == other.x && y == other.y;
 }
+
+double Location::get_x() const
+{
+	return x;
+}
+
+double Location::get_y() const
+{
+	return y;
+}

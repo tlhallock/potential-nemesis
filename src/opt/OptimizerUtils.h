@@ -8,11 +8,6 @@
 #ifndef OPTIMIZER_H_
 #define OPTIMIZER_H_
 
-class Optimizer
-{
-public:
-	Optimizer();
-	virtual ~Optimizer();
-};
+int random_decreasing_probability(int max, double rate = .5);
 
 #endif /* OPTIMIZER_H_ */

@@ -7,6 +7,10 @@
 
 #include "opt/Solver.h"
 
-Solver::Solver() {}
+Solver::Solver(const Parameters &p_) : p(p_) {}
 Solver::~Solver() {}
 
+const Parameters Solver::get_params() const
+{
+	return p;
+}

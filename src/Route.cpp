@@ -83,6 +83,22 @@ std::vector<Action> Route::get_next_possibles() const
 	return actions;
 }
 
+
+int Route::get_num_actions() const
+{
+	return requests.size();
+}
+
+const Action& Route::get_action(int index) const
+{
+	return *requests.at(index);
+}
+
+const Location& Route::get_current_location() const
+{
+	return *requests.back();
+}
+
 sh_time_t Route::get_time_taken(const int max) const
 {
 	if (max <= 1)

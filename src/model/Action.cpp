@@ -51,5 +51,5 @@ Operation Action::get_operation() const { return o; }
 
 void Action::append_to(std::ostream& os) const
 {
-	os << " a=" << std::left << std::setw(10) << action_to_string(o);
+	os << " a=" << std::left << std::setw(10) << operation_to_string(o);
 }

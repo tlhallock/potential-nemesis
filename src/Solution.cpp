@@ -76,3 +76,4 @@ std::ostream& operator<<(std::ostream& os, const Solution& r)
 
 	return os;
 }
+

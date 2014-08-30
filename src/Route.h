@@ -26,10 +26,15 @@ public:
 	TruckState get_truck_state() const;
 	int get_num_requests_serviced() const;
 
+
 	std::vector<Action> get_next_possibles() const;
 
 	bool can_service_next(const Action &req) const;
 	void service_next(const Action *req);
+	const Location &get_current_location() const;
+
+	int get_num_actions() const;
+	const Action &get_action(int index) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Route& r);
 private:
