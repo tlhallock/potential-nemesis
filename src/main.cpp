@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
 	{
 		std::ofstream log { "requests.txt" };
-		foreach(requests, [&log](Request &r)
+		foreach(requests, [&log](const Request &r)
 		{
 			std::cout << r << std::endl;
 			log << r << std::endl;
