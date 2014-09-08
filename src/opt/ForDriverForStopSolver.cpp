@@ -42,9 +42,6 @@ Solution* ForDriverForStopSolver::solve(const City &city)
 				a = get_next_request(city, s, possibles, i);
 			}
 
-
-
-			// WARNING!!! This could service the same place multiple times!!!!
 			if (a == nullptr)
 			{
 				continue;

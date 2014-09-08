@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+namespace deleteme
+{
 
 typedef enum
 {
@@ -18,7 +20,7 @@ typedef enum
 } TruckState;
 
 
-TruckState operation_to_truck_state(Operation o)
+inline TruckState operation_to_truck_state(Operation o)
 {
 	switch (o)
 	{
@@ -41,7 +43,7 @@ TruckState operation_to_truck_state(Operation o)
 }
 
 
-bool operation_follows(Operation prev_operation, Operation next_operation)
+bool old_operation_follows(Operation prev_operation, Operation next_operation)
 {
 	switch (operation_to_truck_state(prev_operation))
 	{
@@ -59,6 +61,42 @@ bool operation_follows(Operation prev_operation, Operation next_operation)
 			return false;
 	}
 }
+
+
+}
+
+
+inline bool operation_follows(Operation prev_operation, Operation next_operation)
+{
+	switch (prev_operation)
+	{
+		case DropOff:
+			return next_operation == PickUp
+					|| next_operation == UnStore;
+		case Store:
+			return next_operation == PickUp
+					// NOT next_operation == UnStore, we don't want to unstore directly after storing
+									// not until we have limits on staging units
+					;
+		case Dump:
+			return next_operation == DropOff
+					|| next_operation == Replace
+					|| next_operation == Store;
+		case UnStore:
+			return next_operation == DropOff
+					|| next_operation == Replace
+					// NOT next_operation == Store, we don't want to store directly after unstoring,
+									// not until we have limits on staging units
+					;
+		case PickUp:
+		case Replace:
+			return next_operation == Dump;
+		default:
+			std::cout << "Should never reach this code." << std::endl;
+			return false;
+	}
+}
+
 
 
 
