@@ -40,7 +40,7 @@ char operation_to_svg(Operation o)
 		case DropOff:
 			return 'D';
 		case Dump:
-			return 'X';
+			return 'T';
 		case Store:
 			return 'S';
 		case UnStore:

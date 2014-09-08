@@ -8,14 +8,11 @@
 #include "Parameters.h"
 
 Parameters::Parameters() {}
-
 Parameters::~Parameters() {}
 
-int Parameters::get_num_drivers() const { return 3; }
-
-int Parameters::get_num_requests() const
+int Parameters::get_num_drivers() const
 {
-	return get_num_drivers() * 10;
+	return 3;
 }
 
 int Parameters::num_random_requests() const
@@ -26,4 +23,14 @@ int Parameters::num_random_requests() const
 int Parameters::num_random_land_fills() const
 {
 	return 5;
+}
+
+int Parameters::num_random_staging_areas() const
+{
+	return 3;
+}
+
+double Parameters::get_scale() const
+{
+	return 100;
 }

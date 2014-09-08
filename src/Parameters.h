@@ -16,10 +16,10 @@ public:
 	~Parameters();
 
 	int get_num_drivers() const;
-	int get_num_requests() const;
-
 	int num_random_requests() const;
 	int num_random_land_fills() const;
+	int num_random_staging_areas() const;
+	double get_scale() const;
 };
 
 #endif /* CONSTRAINTS_H_ */

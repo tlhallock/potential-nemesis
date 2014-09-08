@@ -24,7 +24,11 @@ sh_time_t Action::get_time_taken(sh_time_t start_time, const Location& from) con
 bool Action::follows_in_time(sh_time_t start_time, const Location& from) const
 {
 	sh_time_t time_taken = get_time_taken(start_time, from);
-	return time_taken > get_minimum_time() && time_taken < get_maximum_time();
+	return
+#if CANT_HIT_TOO_EARLY
+			time_taken > get_minimum_time() &&
+#endif
+			time_taken < get_maximum_time();
 }
 
 action_ptr get_start_action()

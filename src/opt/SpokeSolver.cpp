@@ -27,17 +27,10 @@ action_ptr SpokeSolver::get_next_request(
 		std::vector<action_ptr> *possibles,
 		int driver)
 {
-	const Location *current_location = get_location(city, driver);
-	std::sort(possibles->begin(), possibles->end(), [current_location](const action_ptr &i1, const action_ptr &i2)
-	{
-		sh_time_t t1 = i1->get_time_to(*current_location);
-		sh_time_t t2 = i2->get_time_to(*current_location);
-		return t1 > t2;
-	});
-	return possibles->at(random_decreasing_probability(possibles->size()));
+	return get_close(*get_location(city, driver), possibles);
 }
 
-const Landfill *SpokeSolver::get_location(const City& city, int i)
+const Landfill *SpokeSolver::get_location(const City& city, int idx)
 {
 	if (locations.size() == 0)
 	{
@@ -49,5 +42,5 @@ const Landfill *SpokeSolver::get_location(const City& city, int i)
 			index = (index + 1) % city.get_num_land_fills();
 		}
 	}
-	return locations.at(i);
+	return locations.at(idx);
 }
