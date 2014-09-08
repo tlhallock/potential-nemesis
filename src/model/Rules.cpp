@@ -42,7 +42,6 @@ inline TruckState operation_to_truck_state(Operation o)
 	}
 }
 
-
 bool old_operation_follows(Operation prev_operation, Operation next_operation)
 {
 	switch (operation_to_truck_state(prev_operation))
@@ -63,6 +62,11 @@ bool old_operation_follows(Operation prev_operation, Operation next_operation)
 }
 
 
+}
+
+inline bool sizes_match(const action_ptr &a1, const action_ptr &a2)
+{
+	return a1->get_output_dumpster_size() == a2->get_input_dumpster_size();
 }
 
 
@@ -97,14 +101,10 @@ inline bool operation_follows(Operation prev_operation, Operation next_operation
 	}
 }
 
-
-
-
 std::vector<action_ptr>* get_possibles(
-		Operation prev_operation,
 		const Solution *s,
 		sh_time_t start_time,
-		const Location &current_location,
+		const action_ptr& prev_action,
 		const std::vector<action_ptr>& all_possibles)
 {
 	std::vector<action_ptr> *actions = new std::vector<action_ptr>;
@@ -113,9 +113,14 @@ std::vector<action_ptr>* get_possibles(
 	for (auto it = all_possibles.begin(); it != end; ++it)
 	{
 		const action_ptr &action = *it;
-		if (            operation_follows(prev_operation, action->get_operation())
-				&& action->follows_in_time(start_time, current_location)
-				&& !s->already_serviced(action))
+
+//		std::cout << "Prev " << *prev_action.get() << std::endl;
+//		std::cout << "Consider " << *action.get() << std::endl;
+
+		if (            operation_follows(prev_action->get_operation(), action->get_operation())
+				&& action->follows_in_time(start_time, *prev_action.get())
+				&& !s->already_serviced(action)
+				&& sizes_match(prev_action, action))
 		{
 			actions->push_back(action);
 		}

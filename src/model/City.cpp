@@ -7,6 +7,7 @@
 
 #include "model/City.h"
 #include "Solution.h"
+#include "model/FillLand.h"
 
 #include "float.h"
 
@@ -68,15 +69,24 @@ void City::refresh_all_actions()
 	});
 	std::for_each(land_fills.begin(), land_fills.end(), [this](const Landfill& l)
 	{
-		all_actions.push_back(action_ptr {new Action {l, Dump}});
+		all_actions.push_back(action_ptr {new FillLand {l, smallest}});
+		all_actions.push_back(action_ptr {new FillLand {l, small}});
+		all_actions.push_back(action_ptr {new FillLand {l, big}});
+		all_actions.push_back(action_ptr {new FillLand {l, biggest}});
 	});
 	std::for_each(staging_areas.begin(), staging_areas.end(), [this](const StagingArea &a)
 	{
-		all_actions.push_back(action_ptr{new Action {a, Store}});
+		all_actions.push_back(action_ptr{new Action {a, Store, smallest, none}});
+		all_actions.push_back(action_ptr{new Action {a, Store, small,    none}});
+		all_actions.push_back(action_ptr{new Action {a, Store, big,      none}});
+		all_actions.push_back(action_ptr{new Action {a, Store, biggest,  none}});
 	});
 	std::for_each(staging_areas.begin(), staging_areas.end(), [this](const StagingArea &a)
 	{
-		all_actions.push_back(action_ptr {new Action {a, UnStore}});
+		all_actions.push_back(action_ptr{new Action {a, UnStore, none, smallest}});
+		all_actions.push_back(action_ptr{new Action {a, UnStore, none, small}});
+		all_actions.push_back(action_ptr{new Action {a, UnStore, none, big}});
+		all_actions.push_back(action_ptr{new Action {a, UnStore, none, biggest}});
 	});
 }
 

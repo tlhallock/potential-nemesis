@@ -12,6 +12,15 @@
 
 typedef enum
 {
+	smallest,
+	small,
+	big,
+	biggest,
+	none,
+} DumpsterSize;
+
+typedef enum
+{
 	PickUp,
 	DropOff,
 	Dump,
@@ -21,6 +30,6 @@ typedef enum
 } Operation;
 
 std::string operation_to_string(Operation o);
-char operation_to_svg(Operation o);
+std::string operation_to_svg(Operation o);
 
 #endif /* OPERATION_H_ */

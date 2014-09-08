@@ -31,24 +31,24 @@ std::string operation_to_string(Operation a)
 	}
 }
 
-char operation_to_svg(Operation o)
+std::string operation_to_svg(Operation o)
 {
 	switch (o)
 	{
 		case PickUp:
-			return 'P';
+			return "P";
 		case DropOff:
-			return 'D';
+			return "D";
 		case Dump:
-			return 'T';
+			return "T";
 		case Store:
-			return 'S';
+			return "S";
 		case UnStore:
-			return 'U';
+			return "U";
 		case Replace:
-			return 'R';
+			return "R";
 		default:
 			std::cout << "Uh Oh!!!! a62562362346fgagasdg" << std::endl;
-			return '?';
+			return "?";
 	}
 }

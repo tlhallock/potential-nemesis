@@ -27,7 +27,6 @@ Solution* ForDriverForStopSolver::solve(const City &city)
 			action_ptr a {nullptr};
 			{
 				std::vector<action_ptr> *possibles = get_possibles(
-						output.get_last_action().get_operation(),
 						s,
 						output.get_time_taken(),
 						output.get_last_action(),

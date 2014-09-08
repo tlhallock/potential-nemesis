@@ -21,7 +21,12 @@
 class Request : public Action
 {
 public:
-	Request(Location l, Operation a, sh_time_t start_time, sh_time_t stop_time);
+	Request(        Location l,
+			Operation a,
+			sh_time_t start_time,
+			sh_time_t stop_time,
+			DumpsterSize in,
+			DumpsterSize out);
 	virtual ~Request();
 
 	virtual sh_time_t get_time_taken(sh_time_t start_time, const Location &from) const;
@@ -32,8 +37,10 @@ public:
 	int get_points() const;
 
 	bool satisfies(const action_ptr &r) const;
+
 protected:
 	virtual void append_to(std::ostream& os) const;
+	virtual sh_time_t time_at_stop() const;
 private:
 	Operation o;
 

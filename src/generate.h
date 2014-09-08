@@ -11,7 +11,7 @@ double generate_coord();
 
 Location generate_location();
 
-Operation genereate_operation();
+Operation generate_operation();
 
 Request generate_request();
 

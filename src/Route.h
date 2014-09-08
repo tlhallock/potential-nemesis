@@ -30,7 +30,7 @@ public:
 
 	int get_num_actions() const;
 	const Action &get_action(int index) const;
-	const Action &get_last_action() const;
+	const action_ptr &get_last_action() const;
 
 	bool already_serviced(const action_ptr &r) const;
 

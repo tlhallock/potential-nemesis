@@ -21,7 +21,7 @@ class Request;
 class Action : public Location
 {
 public:
-	Action(const Location &l, const Operation &o);
+	Action(const Location &l, const Operation &o, DumpsterSize in, DumpsterSize out);
 	~Action();
 
 	Operation get_operation() const;
@@ -32,18 +32,27 @@ public:
 	virtual sh_time_t get_minimum_time() const;
 	virtual sh_time_t get_maximum_time() const;
 
-	// remame this...
+	// rename this...
 	virtual int get_points() const;
 	virtual bool satisfies(const std::shared_ptr<const Action>  &r) const;
+
+	virtual DumpsterSize get_output_dumpster_size() const;
+	virtual DumpsterSize get_input_dumpster_size() const;
+
 protected:
 	virtual void append_to(std::ostream& os) const;
+
 private:
 	Operation o;
+
+	DumpsterSize insize;
+	DumpsterSize outsize;
 };
 
 typedef std::shared_ptr<const Action> action_ptr;
 
 action_ptr get_start_action();
 
+std::string get_size_text(const Action &a);
 
 #endif /* ACTION_H_ */

@@ -29,9 +29,9 @@ namespace
 	std::string white  {"#ffffff"};
 
 	std::string hex {"0123456789abcdef"};
-	std::string letter_width{"2"};
+	std::string letter_width{"1"};
 	std::string line_width{"1"};
-	std::string font_size{"10"};
+	std::string font_size{"5"};
 
 	double print_unit(double a_number)
 	{
@@ -65,9 +65,9 @@ namespace
 				<< "stroke-width=\"" << line_width << "\" stroke=\"" << color << "\" fill=\"none\"/>" << std::endl;
 	}
 
-	std::string get_color(char c)
+	std::string get_color(const std::string &s)
 	{
-		switch (c)
+		switch (s.at(0))
 		{
 			case 'L':
 				return black;
@@ -88,19 +88,24 @@ namespace
 		}
 	}
 
-	void print_letter(std::ofstream &svg_stream, const Location &location, char c)
+	void print_string(std::ofstream &svg_stream, const Location &location, const std::string &str)
 	{
-		std::string color = get_color(c);
-		svg_stream << "\t\t<text xml:space=\"preserve\" text-anchor=\"middle\" font-family=\"serif\" font-size=\"" << font_size << "\" "
+		std::string color = get_color(str);
+		svg_stream << "\t\t<text xml:space=\"preserve\" text-anchor=\"middle\" font-family=\"Sans\" font-weight=\"lighter\" font-size=\"" << font_size << "\" "
 				<< "id=\"" << next_id()
 				<< "\" y=\"" << print_unit(location.get_y()) << "\" x=\"" << print_unit(location.get_x()) << "\""
 				<< " stroke-width=\"" << letter_width << "\" stroke=\"" << color << "\" fill=\"" << color << "\">"
-				<< c << "</text>" << std::endl;
+				<< str << "</text>" << std::endl;
+	}
+
+	std::string action_text(const Action &a)
+	{
+		return operation_to_svg(a.get_operation()) + get_size_text(a);
 	}
 
 	void print_request(std::ofstream &svg_stream, const Request &solution)
 	{
-		print_letter(svg_stream, solution, operation_to_svg(solution.get_operation()));
+		print_string(svg_stream, solution, action_text(solution));
 	}
 
 	void print_requests(std::ofstream &svg_stream, const City &city)
@@ -121,8 +126,11 @@ namespace
 			const Action& a2 = solution.get_action(i + 1);
 
 			print_line(svg_stream, a1, a2, color);
-			print_letter(svg_stream, a2, operation_to_svg(a2.get_operation()));
-			// print number (order) = i
+
+			std::stringstream ss;
+			ss << i << ":" ;
+			ss << action_text(a2);
+			print_string(svg_stream, a2, ss.str());
 		}
 	}
 
@@ -138,18 +146,18 @@ namespace
 	void print_land_fills(std::ofstream &svg_stream, const City &city)
 	{
 		int size = city.get_num_land_fills();
-		for (int i=0; i<size;i++)
+		for (int i=0; i<size; i++)
 		{
-			print_letter(svg_stream, city.get_land_fill(i), 'L');
+			print_string(svg_stream, city.get_land_fill(i), "L");
 		}
 	}
 
 	void print_staging_areas(std::ofstream &svg_stream, const City &city)
 	{
 		int size = city.get_num_staging_areas();
-		for (int i=0; i<size;i++)
+		for (int i=0; i<size; i++)
 		{
-			print_letter(svg_stream, city.get_staging_area(i), 'S');
+			print_string(svg_stream, city.get_staging_area(i), "S");
 		}
 	}
 

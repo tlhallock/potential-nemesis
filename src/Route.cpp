@@ -57,9 +57,9 @@ const Location& Route::get_current_location() const
 	return *requests.back();
 }
 
-const Action& Route::get_last_action() const
+const action_ptr &Route::get_last_action() const
 {
-	return get_action(requests.size() - 1);
+	return requests.back();
 }
 
 sh_time_t Route::get_time_taken(const int max) const

@@ -18,6 +18,8 @@ typedef int64_t sh_time_t;
 #define sh_time_min 0
 #define sh_time_look_ahead 1000
 #define sh_time_window (sh_time_look_ahead / 5)
+#define TIME_AT_HOUSE 10
+#define LANDFILL_TIME 15
 
 #define foreach(x,y) do { auto mx = (x); std::for_each(mx.begin(), mx.end(), (y)); } while(0)
 

@@ -1,6 +1,5 @@
 
 #include "generate.h"
-
 #include "common.h"
 
 #include <vector>
@@ -8,6 +7,7 @@
 #include <algorithm>
 
 #include <set>
+
 
 double generate_coord(const Parameters &p)
 {
@@ -19,7 +19,7 @@ Location generate_location(const Parameters &p)
 	return Location{generate_coord(p), generate_coord(p)};
 }
 
-Operation genereate_operation()
+Operation generate_operation()
 {
 
 	double choice = rand() / (double) RAND_MAX;
@@ -41,10 +41,56 @@ Operation genereate_operation()
 	}
 }
 
+DumpsterSize generate_size()
+{
+	switch(rand() % 4)
+	{
+		case 0:
+			return smallest;
+		case 1:
+			return small;
+		case 2:
+			return big;
+		case 3:
+			return biggest;
+		default:
+			return smallest;
+	}
+}
+
+DumpsterSize gen_in_size(Operation o)
+{
+	switch (o)
+	{
+		case DropOff:
+		case Replace:
+			return generate_size();
+		default:
+			return none;
+	}
+}
+DumpsterSize gen_out_size(Operation o)
+{
+	switch (o)
+	{
+		case PickUp:
+		case Replace:
+			return generate_size();
+		default:
+			return none;
+	}
+}
+
 Request generate_request(const Parameters &p)
 {
 	sh_time_t time = rand() % sh_time_look_ahead;
-	return Request { generate_location(p), genereate_operation(), time - sh_time_window, time + sh_time_window };
+	Operation o = generate_operation();
+	return Request { generate_location(p),
+		o,
+		time - sh_time_window,
+		time + sh_time_window,
+		gen_in_size(o),
+		gen_out_size(o)};
 }
 
 std::vector<Request> generate_requests(const Parameters &p)
@@ -63,7 +109,7 @@ std::vector<Landfill> generate_landfills(const Parameters &p)
 	std::vector<Landfill> ret;
 	for (int i = 0; i < p.num_random_land_fills(); i++)
 	{
-		ret.push_back(Landfill{generate_location(p)});
+		ret.push_back(Landfill{generate_location(p), LANDFILL_TIME});
 	}
 	return ret;
 }

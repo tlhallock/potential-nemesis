@@ -14,10 +14,9 @@
 bool operation_follows(Operation prev_operation, Operation next_operation);
 
 std::vector<action_ptr>* get_possibles(
-		Operation prev_operation,
 		const Solution *s,
 		sh_time_t start_time,
-		const Location &current_location,
+		const action_ptr &prev_action,
 		const std::vector<action_ptr>& all_possibles);
 
 #endif /* TRUCK_H_ */

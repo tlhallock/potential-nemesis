@@ -10,23 +10,27 @@
 #include <sstream>
 #include <iomanip>
 
-Request::Request(Location l_, Operation a_, sh_time_t start_time_, sh_time_t stop_time_) :
-	Action{l_, a_},
+Request::Request(Location l_,
+		Operation a_,
+		sh_time_t start_time_,
+		sh_time_t stop_time_,
+		DumpsterSize insize_,
+		DumpsterSize outsize_) :
+	Action{l_, a_, insize_, outsize_},
 	o(a_),
 	start_time(start_time_),
-	stop_time(stop_time_){}
+	stop_time(stop_time_) {}
 
 Request::~Request() {}
 
 sh_time_t Request::get_time_taken(sh_time_t start_time, const Location& from) const
 {
 	int64_t t1 = Action::get_time_taken(start_time, from);
-	if (t1 > this->start_time)
+	if (this->start_time > t1)
 	{
-		return t1;
+		t1 = this->start_time;
 	}
-
-	return this->start_time;
+	return t1 + time_at_stop();
 }
 
 sh_time_t Request::get_minimum_time() const
@@ -53,4 +57,9 @@ void Request::append_to(std::ostream& os) const
 bool Request::satisfies(const action_ptr &r) const
 {
 	return get_x() == r->get_x() && get_y() == r->get_y() && get_operation() == r->get_operation();
+}
+
+sh_time_t Request::time_at_stop() const
+{
+	return TIME_AT_HOUSE;
 }
