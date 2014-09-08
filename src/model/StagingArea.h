@@ -13,10 +13,13 @@
 class StagingArea : public Location
 {
 public:
-	StagingArea(double x, double y, sh_time_t wait_time);
+	StagingArea(const Location &loc,
+			sh_time_t wait_time,
+			int max_containers);
 	virtual ~StagingArea();
 private:
 	sh_time_t wait_time;
+	int max_containers;
 };
 
 #endif /* STAGINGAREA_H_ */

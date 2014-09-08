@@ -7,20 +7,13 @@
 
 #include "opt/ForDriverForStopSolver.h"
 
-ForDriverForStopSolver::ForDriverForStopSolver(const Parameters &p) : Solver{p} {}
+#include "model/Rules.h"
 
+ForDriverForStopSolver::ForDriverForStopSolver(const Parameters &p) : Solver{p} {}
 ForDriverForStopSolver::~ForDriverForStopSolver() {}
 
-Solution* ForDriverForStopSolver::solve(const std::vector<Request>& original_requests)
+Solution* ForDriverForStopSolver::solve(const City &city)
 {
-	int size = original_requests.size();
-
-	bool *already_serviced = (bool *) malloc(size);
-	for (int i = 0; i < size; i++)
-	{
-		already_serviced[i] = 0;
-	}
-
 	int num_drivers = p.get_num_drivers();
 	Solution *s = new Solution { num_drivers };
 	while (true)
@@ -31,34 +24,34 @@ Solution* ForDriverForStopSolver::solve(const std::vector<Request>& original_req
 		{
 			Route &output = s->get_route(i);
 
-			std::vector<int> possibles;
-			for (unsigned int i = 0; i < original_requests.size(); i++)
+			action_ptr a {nullptr};
 			{
-				const Action& a = original_requests.at(i);
-				if (output.can_service_next(a) && !already_serviced[i])
+				std::vector<action_ptr> *possibles = get_possibles(
+						output.get_last_action().get_operation(),
+						s,
+						output.get_time_taken(),
+						output.get_last_action(),
+						city.get_all_actions());
+				std::unique_ptr < std::vector<action_ptr> > dme { possibles };
+
+				if (possibles->size() == 0)
 				{
-					possibles.push_back(i);
+					continue;
 				}
-			}
-			int idx;
-			if (possibles.size() != 0
-					&& (idx = get_next_request(original_requests, possibles, s, i)) >= 0)
-			{
-				could_add = true;
-				already_serviced[idx] = true;
-				output.service_next(new Request { original_requests.at(idx) });
 
-				continue;
+				a = get_next_request(city, s, possibles, i);
 			}
 
-			std::vector<Action> more = output.get_next_possibles();
-			if (more.size() == 0)
+
+
+			// WARNING!!! This could service the same place multiple times!!!!
+			if (a == nullptr)
 			{
 				continue;
 			}
 
-			output.service_next(new Action { more.at(rand() % more.size()) });
 			could_add = true;
+			output.service_next(a);
 		}
 
 		if (!could_add)
@@ -66,8 +59,6 @@ Solution* ForDriverForStopSolver::solve(const std::vector<Request>& original_req
 			break;
 		}
 	}
-
-	free(already_serviced);
 
 	return s;
 }

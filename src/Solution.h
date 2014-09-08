@@ -22,6 +22,8 @@ public:
 	int get_num_drivers() const;
 	Route &get_route(int index) const;
 
+	bool already_serviced(const action_ptr &r) const;
+
 	friend std::ostream& operator<<(std::ostream& os, const Solution& r);
 private:
 	std::vector<Route *> routes;

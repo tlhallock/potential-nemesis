@@ -8,7 +8,7 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 
-#include "model/Request.h"
+#include "model/City.h"
 #include "Parameters.h"
 #include "Solution.h"
 
@@ -20,7 +20,7 @@ public:
 	Solver(const Parameters &p);
 	virtual ~Solver();
 
-	virtual Solution *solve(const std::vector<Request>& requests) = 0;
+	virtual Solution *solve(const City &city) = 0;
 	virtual std::string get_name() const = 0;
 
 	const Parameters get_params() const;

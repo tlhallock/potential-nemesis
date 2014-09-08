@@ -16,9 +16,13 @@ public:
 	ForDriverForStopSolver(const Parameters &p);
 	~ForDriverForStopSolver();
 
-	Solution *solve(const std::vector<Request>& requests);
+	Solution *solve(const City &city);
 protected:
-	virtual int get_next_request(const std::vector<Request>& originals, std::vector<int> &possibles, const Solution *s, int driver) = 0;
+	virtual action_ptr get_next_request(
+			const City &city,
+			const Solution *s,
+			std::vector<action_ptr> *possibles,
+			int driver) = 0;
 };
 
 #endif /* FORDRIVERFORSTOPSOLVER_H_ */

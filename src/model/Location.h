@@ -16,6 +16,7 @@
 class Location {
 public:
 	Location(double x, double y);
+	Location(const Location &loc);
 	virtual ~Location();
 
 	friend std::ostream& operator<<(std::ostream& os, const Location& r);

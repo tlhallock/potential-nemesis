@@ -15,8 +15,9 @@ typedef enum
 	PickUp,
 	DropOff,
 	Dump,
-	Stage,
-	UnStage,
+	Store,
+	UnStore,
+	Replace,
 } Operation;
 
 std::string operation_to_string(Operation o);

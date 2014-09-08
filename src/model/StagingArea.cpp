@@ -5,16 +5,12 @@
  *      Author: rever
  */
 
-#include <model/StagingArea.h>
+#include "model/StagingArea.h"
 
-StagingArea::StagingArea()
-{
-	// TODO Auto-generated constructor stub
+StagingArea::StagingArea(const Location &loc, sh_time_t wait_time_, int max_containers_) :
+	Location{loc},
+	wait_time (wait_time_),
+	max_containers(max_containers_) {}
 
-}
-
-StagingArea::~StagingArea()
-{
-	// TODO Auto-generated destructor stub
-}
+StagingArea::~StagingArea() {}
 

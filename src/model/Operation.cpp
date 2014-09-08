@@ -14,15 +14,17 @@ std::string operation_to_string(Operation a)
 	switch (a)
 	{
 		case PickUp:
-			return "PickUp";
+			return "Pick up full dumpster                ";
 		case DropOff:
-			return "DropOff";
+			return "Drop off empty dumpster              ";
 		case Dump:
-			return "Dump";
-		case Stage:
-			return "Stage";
-		case UnStage:
-			return "UnStage";
+			return "Dump dumpster in landfill            ";
+		case Store:
+			return "Store empty dumpster                 ";
+		case UnStore:
+			return "Load empty dumpster from storage     ";
+		case Replace:
+			return "Replace full dumpster with empty one ";
 		default:
 			std::cout << "Uh Oh!!!! 45234523542435" << std::endl;
 			return "Uknown";
@@ -39,10 +41,12 @@ char operation_to_svg(Operation o)
 			return 'D';
 		case Dump:
 			return 'X';
-		case Stage:
+		case Store:
 			return 'S';
-		case UnStage:
+		case UnStore:
 			return 'U';
+		case Replace:
+			return 'R';
 		default:
 			std::cout << "Uh Oh!!!! a62562362346fgagasdg" << std::endl;
 			return '?';

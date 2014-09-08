@@ -14,6 +14,8 @@
 
 #define DELIM "\t"
 
+#if 0
+
 namespace
 {
 	std::map <Operation, char> o2a;
@@ -54,6 +56,6 @@ void save_requests(std::string filename, const std::vector<Request>& requests)
 	{
 		output_file << r.get_x() << DELIM << r.get_y() << DELIM <<  r.get_operation() << std::endl;
 	});
-
-
 }
+
+#endif

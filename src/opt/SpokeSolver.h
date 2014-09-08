@@ -18,9 +18,16 @@ public:
 
 	std::string get_name() const;
 protected:
-	int get_next_request(const std::vector<Request>& originals, std::vector<int> &possibles, const Solution *s, int driver);
+	action_ptr get_next_request(
+			const City &city,
+			const Solution *s,
+			std::vector<action_ptr> *possibles,
+			int driver);
 private:
-	std::vector<Location> locations;
+
+	const Landfill* get_location(const City &c, int i);
+
+	std::vector<const Landfill *> locations;
 };
 
 #endif /* SPOKESOLVER_H_ */

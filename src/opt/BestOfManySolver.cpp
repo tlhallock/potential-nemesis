@@ -18,7 +18,7 @@ BestOfManySolver::~BestOfManySolver()
 	delete delegate;
 }
 
-Solution* BestOfManySolver::solve(const std::vector<Request>& requests)
+Solution* BestOfManySolver::solve(const City &city)
 {
 	if (delegate == nullptr)
 	{
@@ -36,7 +36,7 @@ Solution* BestOfManySolver::solve(const std::vector<Request>& requests)
 			break;
 		}
 
-		Solution *next = delegate->solve(requests);
+		Solution *next = delegate->solve(city);
 		Cost *another = new Cost{*next};
 
 		if (!another->is_better_than(cost))

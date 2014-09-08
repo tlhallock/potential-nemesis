@@ -16,7 +16,7 @@ public:
 	BestOfManySolver(const Parameters &p, Solver *delegate, int max_iters);
 	virtual ~BestOfManySolver();
 
-	Solution *solve(const std::vector<Request>& requests);
+	Solution *solve(const City &city);
 	std::string get_name() const;
 private:
 	Solver *delegate;

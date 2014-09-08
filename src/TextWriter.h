@@ -13,7 +13,7 @@
 #include <vector>
 
 
-std::vector *load_requests(std::string filename);
+//std::vector *load_requests(std::string filename);
 void save_requests(std::string filename, const std::vector<Request> &requests);
 
 

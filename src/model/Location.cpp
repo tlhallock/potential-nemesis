@@ -10,7 +10,9 @@
 #include <cmath>
 #include <iomanip>
 
-Location::Location(double x_, double y_) : x(x_), y(y_) {}
+Location::Location(double x_, double y_) : x{x_}, y{y_} {}
+Location::Location(const Location& loc) :
+		Location{loc.get_x(), loc.get_y()} {}
 Location::~Location() {}
 
 std::ostream& operator<<(std::ostream& os, const Location& r)
@@ -44,3 +46,4 @@ double Location::get_y() const
 {
 	return y;
 }
+

@@ -17,6 +17,7 @@
 #include <inttypes.h>
 #include <iostream>
 
+// TODO: A request is not an action...
 class Request : public Action
 {
 public:
@@ -29,12 +30,16 @@ public:
 	virtual sh_time_t get_maximum_time() const;
 
 	int get_points() const;
+
+	bool satisfies(const action_ptr &r) const;
 protected:
 	virtual void append_to(std::ostream& os) const;
-
 private:
+	Operation o;
+
 	sh_time_t start_time;
 	sh_time_t stop_time;
 };
+
 
 #endif /* REQUEST_H_ */

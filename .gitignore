@@ -30,4 +30,6 @@ eclipse/SamsHauling/random.req.svg
 eclipse/SamsHauling/random.sol.svg
 eclipse/SamsHauling/requests.txt
 eclipse/SamsHauling/spoke.sol.svg
-eclipse/DistanceDatabaseCreator/Debug/
+eclipse/DistanceDatabaseCreator/Debug/eclipse/SamsHauling/sol.nearest.txt
+eclipse/SamsHauling/sol.random.txt
+eclipse/SamsHauling/sol.spoke.txt

@@ -16,7 +16,11 @@ std::string RandomGeneratorSolver::get_name() const
 	return "random";
 }
 
-int RandomGeneratorSolver::get_next_request(const std::vector<Request>& originals, std::vector<int> &possibles, const Solution *s, int driver)
+action_ptr RandomGeneratorSolver::get_next_request(
+		const City &city,
+		const Solution *s,
+		std::vector<action_ptr> *possibles,
+		int driver)
 {
-	return possibles.at(rand() % possibles.size());
+	return possibles->at(rand() % possibles->size());
 }

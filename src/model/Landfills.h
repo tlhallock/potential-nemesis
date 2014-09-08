@@ -14,7 +14,8 @@
 
 class Landfill : public Location
 {
-	Landfill(double x, double y);
+public:
+	Landfill(const Location &loc);
 	~Landfill();
 };
 

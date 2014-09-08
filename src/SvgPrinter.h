@@ -9,9 +9,11 @@
 #define SVGPRINTER_H_
 
 #include "Solution.h"
+#include "model/City.h"
 
-void svg_print_requests(const std::string &filename, const std::vector<Request> &requests);
 
+// Might should move these to their classes...
+void svg_print_city(const std::string &filename, const City &city);
 void svg_print_solution(const std::string &filename, const Solution *solution);
 
 #endif /* SVGPRINTER_H_ */
