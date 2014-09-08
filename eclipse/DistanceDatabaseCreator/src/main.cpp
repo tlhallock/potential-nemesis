@@ -5,55 +5,38 @@
  *      Author: thallock
  */
 
-#include "DistanceSet.h"
+#include "DistanceSetSet.h"
 
 #include <iostream>
+#include <fstream>
 
 #include <float.h>
-
-Guess get_best_guess(const std::vector<const DistanceSet> &sets, const Point &p1, const Point &p2)
-{
-	int size = sets.size();
-
-	Guess g;
-
-	auto end = sets.end();
-	for (auto it = sets.begin(); it != end; ++it)
-	{
-		Guess another = it->get_best_guess(p1, p2);
-		if (another.is_better_than(g))
-		{
-			g = another;
-		}
-	}
-	return g;
-}
-
-double get_estimated_cost(std::vector<const DistanceSet> &sets)
-{
-	int num_iters = 100;
-
-	double sum = 0;
-
-	for (int i = 0; i < num_iters; i++)
-	{
-		Point p1;
-		Point p2;
-		sum += get_best_guess(sets, p1, p2).get_cost();
-	}
-
-	return sum / num_iters;
-}
 
 
 int main(int argc, char **argv)
 {
-	// Load all distance sets
-	std::vector<const DistanceSet> sets;
+	srand(time(nullptr));
 
-	Point p1;
-	Point p2;
+	DistanceSetSet s {"/work/potential-nemesis/python/examples/list.txt"};
 
+	std::cout << "Found " << s.get_num_points() << " different points." << std::endl << std::endl;
+	std::cout << "time/coord = " << s.get_average_time_per_coord() << std::endl << std::endl;
+	std::cout << "time/meter = " << s.get_average_time_per_meter() << std::endl << std::endl;
+	std::cout << "avg cost = " << s.get_average_cost(10000) * s.get_average_time_per_coord() / 60 << " min" << std::endl << std::endl;
 
-	std::cout << get_estimated_cost(sets) << std::endl;
+	Point lower;
+	Point upper;
+
+	s.find_bounds(lower, upper);
+	std::cout << "bounds: " << lower << " to " << upper << std::endl;
+
+	Point p1 = get_random_point(lower, upper);
+	Point p2 = get_random_point(lower, upper);
+
+	std::cout << "to search: " << p1 << " to " << p2 << std::endl;
+
+	Guess g = s.get_best_guess(p1, p2);
+	std::cout << "Guess: " << g << std::endl;
+
+	return 0;
 }

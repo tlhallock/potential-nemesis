@@ -9,11 +9,58 @@
 
 #include <algorithm>
 #include <float.h>
+#include <fstream>
+#include <iostream>
 
 #define TIME_PER_COORD 0
 
-DistanceSet::DistanceSet() {}
-DistanceSet::~DistanceSet() {}
+DistanceSet::DistanceSet(const std::string &filename)
+{
+	std::ifstream in {filename};
+
+	int num;
+
+	in >> num;
+
+	distances = make_array(num);
+	durations = make_array(num);
+
+	for (int i=0; i<num; i++)
+	{
+		int idx;
+		double x, y;
+		in >> idx;
+		in >> x;
+		in >> y;
+
+		std::string str;
+		getline(in, str);
+
+		points.push_back(Point {x, y, str});
+	}
+
+	for (int i=0; i<num; i++)
+	{
+		for (int j=0; j<num; j++)
+		{
+			int idx1, idx2;
+			int64_t duration, distance;
+
+			in >> idx1;
+			in >> idx2;
+			in >> duration;
+			in >> distance;
+
+			durations[idx1][idx2] = duration;
+			distances[idx1][idx2] = distance;
+		}
+	}
+}
+DistanceSet::~DistanceSet()
+{
+	delete_array(distances, points.size());
+	delete_array(durations, points.size());
+}
 
 const Point& DistanceSet::get_point(int index) const
 {
@@ -22,7 +69,7 @@ const Point& DistanceSet::get_point(int index) const
 
 const double& DistanceSet::get_distance_between(int index1, int index2) const
 {
-	return distances[index1][index2];
+	return durations[index1][index2];
 }
 
 int DistanceSet::get_closest_point(const Point& other) const
@@ -55,3 +102,96 @@ Guess DistanceSet::get_best_guess(const Point &p1, const Point &p2) const
 		TIME_PER_COORD * (get_point(idx1).get_euclidean_distance(p1) + get_point(idx2).get_euclidean_distance(p1))
 			+ get_distance_between(idx1, idx2)};
 }
+
+double** DistanceSet::make_array(int dim)
+{
+	double **retval = (double **) malloc (dim * sizeof(*retval));
+	for(int i=0; i<dim; i++)
+	{
+		retval[i] = (double *) malloc (dim * sizeof(*retval[i]));
+	}
+	return retval;
+}
+
+void DistanceSet::find_bounds(Point& lower, Point& upper) const
+{
+	lower.set_x(points.front().get_x());
+	upper.set_x(points.front().get_x());
+	lower.set_y(points.front().get_y());
+	upper.set_y(points.front().get_y());
+
+	auto end = points.end();
+	for (auto it = points.begin(); it != end; ++it)
+	{
+		expand_bounds(lower, upper, *it);
+	}
+}
+
+int DistanceSet::get_num_points() const
+{
+	return points.size();
+}
+
+void DistanceSet::delete_array(double **array, int dim)
+{
+	for (int i=0; i<dim; i++)
+	{
+		free(array[i]);
+	}
+	free(array);
+}
+
+void expand_bounds(Point& lower, Point& upper, const Point& another_point)
+{
+	if (lower.get_x() < another_point.get_x())
+	{
+		lower.set_x(another_point.get_x());
+	}
+	if (lower.get_y() < another_point.get_y())
+	{
+		lower.set_y(another_point.get_y());
+	}
+	if (upper.get_x() > another_point.get_x())
+	{
+		upper.set_x(another_point.get_x());
+	}
+	if (upper.get_y() > another_point.get_y())
+	{
+		upper.set_y(another_point.get_y());
+	}
+}
+
+double DistanceSet::get_average_time_per_coord() const
+{
+	double sum = 0;
+	int size = get_num_points();
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < i; j++)
+		{
+			double di = get_point(i).get_euclidean_distance(get_point(j));
+			double time = durations[i][j];
+
+			sum += time / di;
+		}
+	}
+	return sum / size;
+}
+
+double DistanceSet::get_average_time_per_meter() const
+{
+	double sum = 0;
+	int size = get_num_points();
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < i; j++)
+		{
+			double di = distances[i][j];
+			double time = durations[i][j];
+
+			sum += time / di;
+		}
+	}
+	return sum / size;
+}
+

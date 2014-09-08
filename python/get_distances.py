@@ -5,6 +5,7 @@ import os
 import shutil
 import random
 import sys
+import time
 
 def encode_locs(locs):
     url = locs[0]
@@ -41,8 +42,9 @@ def get_locs(num):
     return ls
 
 def save_several_distances(num, num_in_each):
+    ts = time.time()
     for i in range(num):
-        save_distances(get_locs(num_in_each), "./distances." + str(i) + ".json");
+        save_distances(get_locs(num_in_each), "./distances." + str(ts) + "." + str(i) + ".json");
         print("Saved set ", i);
 
 if len(sys.argv) < 3:

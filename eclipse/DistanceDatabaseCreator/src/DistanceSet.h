@@ -16,7 +16,7 @@
 class DistanceSet
 {
 public:
-	DistanceSet();
+	DistanceSet(const std::string &filename);
 	virtual ~DistanceSet();
 
 	const Point &get_point(int index) const;
@@ -24,9 +24,22 @@ public:
 	int get_closest_point(const Point &other) const;
 
 	Guess get_best_guess(const Point &p1, const Point &p2) const;
+
+	void find_bounds(Point &lower, Point &upper) const;
+
+	double get_average_time_per_coord() const;
+	double get_average_time_per_meter() const;
+
+	int get_num_points() const;
 private:
-	std::vector<const Point> points;
+	double **make_array(int dim);
+	void delete_array(double **array, int dim);
+
+	std::vector<Point> points;
 	double **distances;
+	double **durations;
 };
+
+void expand_bounds(Point &lower, Point &upper, const Point &another_point);
 
 #endif /* DISTANCESET_H_ */

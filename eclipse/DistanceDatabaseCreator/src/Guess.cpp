@@ -24,3 +24,14 @@ double Guess::get_answer() const
 {
 	return answer;
 }
+
+double Guess::get_cost() const
+{
+	return cost;
+}
+
+std::ostream& operator<<(std::ostream& os, const Guess &g)
+{
+	os << "Cost: " << g.cost << " (" << g.cost * 25171.6 / 60 << " min) answer: " << g.answer << " ( " << g.answer / 60 << " min)" << std::endl;
+	return os;
+}

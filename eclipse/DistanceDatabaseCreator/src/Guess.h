@@ -8,6 +8,8 @@
 #ifndef GUESS_H_
 #define GUESS_H_
 
+#include <iostream>
+
 class Guess
 {
 public:
@@ -19,6 +21,8 @@ public:
 
 	double get_answer() const;
 	double get_cost() const;
+
+	friend std::ostream& operator<<(std::ostream& os, const Guess &g);
 private:
 	double cost;
 	double answer;
