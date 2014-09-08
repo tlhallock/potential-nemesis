@@ -19,6 +19,7 @@ public:
 	void find_bounds(Point &lower, Point &upper) const;
 	Guess get_best_guess(const Point &p1, const Point &p2) const;
 	double get_average_cost(int num_iters) const;
+	double get_average_time(int num_iters) const;
 
 	int get_num_points() const;
 

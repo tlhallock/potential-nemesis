@@ -18,9 +18,15 @@ DistanceSet::DistanceSet(const std::string &filename)
 {
 	std::ifstream in {filename};
 
-	int num;
+	int num = -1;
 
 	in >> num;
+
+	if (num < 0 || num > 1000)
+	{
+		std::cout << "Invalid number of points in file " << filename << std::endl;
+		return;
+	}
 
 	distances = make_array(num);
 	durations = make_array(num);
@@ -50,6 +56,30 @@ DistanceSet::DistanceSet(const std::string &filename)
 			in >> idx2;
 			in >> duration;
 			in >> distance;
+
+			if (idx1 < 0 || idx1 > 1000)
+			{
+				std::cout << "Invalid idx1 in file " << filename << std::endl;
+				std::cout << idx1 << std::endl;
+				points.clear();
+				return;
+			}
+
+			if (idx2 < 0 || idx2 > 1000)
+			{
+				std::cout << "Invalid idx2 in file " << filename << std::endl;
+				std::cout << idx2 << std::endl;
+				points.clear();
+				return;
+			}
+
+			if (distance < 0 || distance > 1000 * 1000) // less than 1000 km
+			{
+				std::cout << "Invalid distance in file " << filename << std::endl;
+				std::cout << distance << std::endl;
+				points.clear();
+				return;
+			}
 
 			durations[idx1][idx2] = duration;
 			distances[idx1][idx2] = distance;
@@ -165,33 +195,57 @@ double DistanceSet::get_average_time_per_coord() const
 {
 	double sum = 0;
 	int size = get_num_points();
+	int count = 0;
 	for (int i = 0; i < size; i++)
 	{
-		for (int j = 0; j < i; j++)
+		for (int j = 0; j < size; j++)
 		{
+			if (i == j)
+			{
+				continue;
+			}
+
 			double di = get_point(i).get_euclidean_distance(get_point(j));
 			double time = durations[i][j];
 
+			if (di == 0)
+			{
+				continue;
+			}
+
 			sum += time / di;
+			count++;
 		}
 	}
-	return sum / size;
+	return sum / count;
 }
 
 double DistanceSet::get_average_time_per_meter() const
 {
 	double sum = 0;
 	int size = get_num_points();
+	int count = 0;
 	for (int i = 0; i < size; i++)
 	{
 		for (int j = 0; j < i; j++)
 		{
+			if (i == j)
+			{
+				continue;
+			}
+
 			double di = distances[i][j];
 			double time = durations[i][j];
 
+			if (di == 0)
+			{
+				continue;
+			}
+
 			sum += time / di;
+			count++;
 		}
 	}
-	return sum / size;
+	return sum / count;
 }
 

@@ -17,7 +17,13 @@ DistanceSetSet::DistanceSetSet(const std::string &filename)
 
 	while (getline(in, line))
 	{
-		sets.push_back(new DistanceSet{line});
+		auto s = new DistanceSet{line};
+		if (s->get_num_points() <= 1)
+		{
+			delete s;
+			continue;
+		}
+		sets.push_back(s);
 	}
 }
 
@@ -61,6 +67,25 @@ double DistanceSetSet::get_average_cost(int num_iters) const
 		Point p2 = get_random_point(lower, upper);
 
 		sum += get_best_guess(p1, p2).get_cost();
+	}
+
+	return sum / num_iters;
+}
+
+double DistanceSetSet::get_average_time(int num_iters) const
+{
+	double sum = 0;
+
+	Point upper;
+	Point lower;
+	find_bounds(lower, upper);
+
+	for (int i = 0; i < num_iters; i++)
+	{
+		Point p1 = get_random_point(lower, upper);
+		Point p2 = get_random_point(lower, upper);
+
+		sum += get_best_guess(p1, p2).get_answer();
 	}
 
 	return sum / num_iters;

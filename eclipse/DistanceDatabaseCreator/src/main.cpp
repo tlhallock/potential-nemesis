@@ -21,8 +21,9 @@ int main(int argc, char **argv)
 
 	std::cout << "Found " << s.get_num_points() << " different points." << std::endl << std::endl;
 	std::cout << "time/coord = " << s.get_average_time_per_coord() << std::endl << std::endl;
-	std::cout << "time/meter = " << s.get_average_time_per_meter() << std::endl << std::endl;
+	std::cout << "time/meter = " << s.get_average_time_per_meter() << " (" << (1/s.get_average_time_per_meter()*2.23694) << " mi/h)" <<std::endl << std::endl;
 	std::cout << "avg cost = " << s.get_average_cost(10000) * s.get_average_time_per_coord() / 60 << " min" << std::endl << std::endl;
+	std::cout << "avg time = " << s.get_average_time(10000) / 60 << " min" << std::endl << std::endl;
 
 	Point lower;
 	Point upper;
