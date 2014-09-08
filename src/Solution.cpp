@@ -77,3 +77,7 @@ std::ostream& operator<<(std::ostream& os, const Solution& r)
 	return os;
 }
 
+bool Solution::already_serviced(const action_ptr& r) const
+{
+	return std::any_of(routes.begin(), routes.end(), [&r](const Route *route) { return route->already_serviced(r); });
+}

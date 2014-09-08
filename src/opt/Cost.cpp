@@ -27,11 +27,11 @@ bool Cost::is_better_than(const Cost *other)
 		return true;
 	}
 
-	if (num_serviced < other->num_serviced)
+	if (num_serviced > other->num_serviced)
 	{
 		return true;
 	}
-	else if (other->num_serviced < num_serviced)
+	else if (other->num_serviced > num_serviced)
 	{
 		return false;
 	}

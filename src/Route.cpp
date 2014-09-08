@@ -8,34 +8,27 @@
 #include "Route.h"
 
 #include "model/Landfills.h"
+#include "model/Rules.h"
 
 #include <algorithm>
 #include <iomanip>
 
 Route::Route()
 {
-	requests.push_back(new Action(get_start_action()));
+	requests.push_back(get_start_action());
 }
 
-Route::~Route()
+Route::~Route() {}
+
+bool Route::can_service_next(action_ptr req) const
 {
-	std::for_each(requests.begin(), requests.end(), [](const Action *a)
-	{
-		delete a;
-	});
+	return operation_follows(requests.back()->get_operation(), req->get_operation())
+			&& req->follows_in_time(get_time_taken(), *requests.back().get());
 }
 
-bool Route::can_service_next(const Action &req) const
+void Route::service_next(action_ptr req)
 {
-	sh_time_t time_taken = req.get_time_taken(get_time_taken(), *requests.back());
-	return requests.back()->follows(req)
-//			&& time_taken > req.get_minimum_time()
-			&& time_taken < req.get_maximum_time();
-}
-
-void Route::service_next(const Action *req)
-{
-	if (!can_service_next(*req))
+	if (!can_service_next(req))
 	{
 		std::cout << "Impossible state: " << *req << " from\n" << *this << std::endl;
 		return;
@@ -48,41 +41,6 @@ sh_time_t Route::get_time_taken() const
 {
 	return get_time_taken(requests.size());
 }
-
-TruckState Route::get_truck_state() const
-{
-	return requests.back()->get_truck_state();
-}
-
-std::vector<Action> Route::get_next_possibles() const
-{
-	std::vector<Action> actions;
-
-	const Action *a = requests.back();
-	switch (a->get_truck_state())
-	{
-	case EmptyDumpster:
-		if (a->get_operation() != UnStage)
-		{
-			actions.push_back(Action{get_closest_landfill(*a), Stage});
-		}
-		break;
-	case FullDumpster:
-		actions.push_back(Action{get_closest_landfill(*a), Dump});
-		break;
-	case NoDumpster:
-		if (a->get_operation() != Stage)
-		{
-			actions.push_back(Action{get_closest_landfill(*a), UnStage});
-		}
-		break;
-	default:
-		std::cout << "Do not go here 13094109843" << std::endl;
-		break;
-	}
-	return actions;
-}
-
 
 int Route::get_num_actions() const
 {
@@ -99,6 +57,11 @@ const Location& Route::get_current_location() const
 	return *requests.back();
 }
 
+const Action& Route::get_last_action() const
+{
+	return get_action(requests.size() - 1);
+}
+
 sh_time_t Route::get_time_taken(const int max) const
 {
 	if (max <= 1)
@@ -106,8 +69,8 @@ sh_time_t Route::get_time_taken(const int max) const
 		return 0;
 	}
 
-	const Action *a1 = requests.at(max - 1);
-	const Action *a2 = requests.at(max - 2);
+	const action_ptr &a1 = requests.at(max - 1);
+	const action_ptr &a2 = requests.at(max - 2);
 
 	return a1->get_time_taken(get_time_taken(max - 1), *a2);
 }
@@ -128,15 +91,20 @@ std::ostream& operator<<(std::ostream& os, const Route& r)
 	os << "\tRoute: t=" << r.get_time_taken() << " n=" << r.get_num_requests_serviced() << " path=" << std::endl;
 	for (unsigned int i = 0; i < r.requests.size(); i++)
 	{
-		const Action *a = r.requests.at(i);
+		const action_ptr &a = r.requests.at(i);
 
 		os << "\t\t[" << std::setw(4) << i
 				<< " t=" << std::setw(5) << r.get_time_taken(i + 1);
 		if (i != 0)
 		{
-				os << " d=" << std::setw(5) << (r.requests.at(i-1)->get_time_to(*a));
+				os << " d=" << std::setw(5) << (r.requests.at(i-1)->get_time_to(*a.get()));
 		}
 		os << " : " << *a << "]" << std::endl;
 	}
 	return os;
+}
+
+bool Route::already_serviced(const action_ptr& r) const
+{
+	return std::any_of(requests.begin(), requests.end(), [&r](const action_ptr &a){ return a->satisfies(r); });
 }

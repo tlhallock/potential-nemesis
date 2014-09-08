@@ -8,8 +8,7 @@
 #ifndef ROUTE_H_
 #define ROUTE_H_
 
-#include "model/Request.h"
-#include "model/Truck.h"
+#include "model/Action.h"
 
 #include <vector>
 
@@ -23,24 +22,23 @@ public:
 	virtual ~Route();
 
 	sh_time_t get_time_taken() const;
-	TruckState get_truck_state() const;
 	int get_num_requests_serviced() const;
 
-
-	std::vector<Action> get_next_possibles() const;
-
-	bool can_service_next(const Action &req) const;
-	void service_next(const Action *req);
+	bool can_service_next(action_ptr req) const;
+	void service_next(action_ptr req);
 	const Location &get_current_location() const;
 
 	int get_num_actions() const;
 	const Action &get_action(int index) const;
+	const Action &get_last_action() const;
+
+	bool already_serviced(const action_ptr &r) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Route& r);
 private:
 	sh_time_t get_time_taken(const int i) const;
 
-	std::vector<const Action*> requests;
+	std::vector<action_ptr> requests;
 };
 
 #endif /* ROUTE_H_ */

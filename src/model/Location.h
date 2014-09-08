@@ -16,10 +16,13 @@
 class Location {
 public:
 	Location(double x, double y);
+	Location(const Location &loc);
 	virtual ~Location();
 
 	friend std::ostream& operator<<(std::ostream& os, const Location& r);
 	sh_time_t get_time_to(const Location &l) const;
+
+	bool is_same_location(const Location &other) const;
 
 	double get_x() const;
 	double get_y() const;

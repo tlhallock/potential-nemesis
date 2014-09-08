@@ -81,6 +81,8 @@ namespace
 				return yellow;
 			case 'U':
 				return pink;
+			case 'R':
+				return red;
 			default:
 				return black;
 		}
@@ -101,12 +103,13 @@ namespace
 		print_letter(svg_stream, solution, operation_to_svg(solution.get_operation()));
 	}
 
-	void print_requests(std::ofstream &svg_stream, const std::vector<Request> &solution)
+	void print_requests(std::ofstream &svg_stream, const City &city)
 	{
-		foreach(solution, [&svg_stream](const Request &r)
+		int size = city.get_num_requests();
+		for (int i = 0; i < size; i++)
 		{
-			print_request(svg_stream, r);
-		});
+			print_request(svg_stream, city.get_request(i));
+		}
 	}
 
 	void print_route(std::ofstream &svg_stream, const Route &solution, const std::string &color)
@@ -132,17 +135,27 @@ namespace
 		}
 	}
 
-	void print_land_fills(std::ofstream &svg_stream)
+	void print_land_fills(std::ofstream &svg_stream, const City &city)
 	{
-		foreach(get_land_fills(), [&svg_stream](const Location &l)
+		int size = city.get_num_land_fills();
+		for (int i=0; i<size;i++)
 		{
-			print_letter(svg_stream, l, 'L');
-		});
+			print_letter(svg_stream, city.get_land_fill(i), 'L');
+		}
 	}
 
-	void print_preamble(std::ofstream &svg_stream, const std::string &title)
+	void print_staging_areas(std::ofstream &svg_stream, const City &city)
 	{
-		svg_stream << "<svg width=\"" << print_unit(DIM_MAX) << "\" height=\"" << print_unit(DIM_MAX) << "\" xmlns=\"http://www.w3.org/2000/svg\">" << std::endl;
+		int size = city.get_num_staging_areas();
+		for (int i=0; i<size;i++)
+		{
+			print_letter(svg_stream, city.get_staging_area(i), 'S');
+		}
+	}
+
+	void print_preamble(std::ofstream &svg_stream, const std::string &title, const Parameters &p)
+	{
+		svg_stream << "<svg width=\"" << print_unit(p.get_scale()) << "\" height=\"" << print_unit(p.get_scale()) << "\" xmlns=\"http://www.w3.org/2000/svg\">" << std::endl;
 		svg_stream << "\t<g>" << std::endl;
 		svg_stream << "\t\t<title>" + title + "</title>" << std::endl;
 	}
@@ -154,20 +167,21 @@ namespace
 	}
 }
 
-void svg_print_requests(const std::string &filename, const std::vector<Request> &requests)
+void svg_print_city(const std::string &filename, const City &city, const Parameters &p)
 {
 	std::ofstream svg_stream { filename + ".req.svg" };
-	print_preamble(svg_stream, "requests");
-	print_requests(svg_stream, requests);
-	print_land_fills(svg_stream);
+	print_preamble(svg_stream, "requests", p);
+	print_requests(svg_stream, city);
+	print_land_fills(svg_stream, city);
+	print_staging_areas(svg_stream, city);
 	// print staging areas
 	print_postamble(svg_stream);
 }
 
-void svg_print_solution(const std::string &filename, const Solution *solution)
+void svg_print_solution(const std::string &filename, const Solution *solution, const Parameters &p)
 {
 	std::ofstream svg_stream { filename + ".sol.svg" };
-	print_preamble(svg_stream, "solution");
+	print_preamble(svg_stream, "solution", p);
 	print_solution(svg_stream, *solution);
 	print_postamble(svg_stream);
 }

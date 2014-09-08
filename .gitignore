@@ -30,6 +30,9 @@ eclipse/SamsHauling/random.req.svg
 eclipse/SamsHauling/random.sol.svg
 eclipse/SamsHauling/requests.txt
 eclipse/SamsHauling/spoke.sol.svg
-eclipse/DistanceDatabaseCreator/Debug
+eclipse/DistanceDatabaseCreator/Debug/
+eclipse/DistanceDatabaseCreator/.settings/
+eclipse/SamsHauling/sol.random.txt
+eclipse/SamsHauling/sol.spoke.txt
+eclipse/SamsHauling/sol.nearest.txt
 python/examples
-eclipse/DistanceDatabaseCreator/.settings
