@@ -92,8 +92,7 @@ final class Downloader
 				ps.println("=============================================");
 			} catch (FileNotFoundException e) {}
 			
-			System.out.println(System.currentTimeMillis() - s);
-			
+			System.out.println("t = " + (System.currentTimeMillis() - s));
 			return new DownloadData(timeString, distString, desc1, desc2);
 		}
 		catch (InterruptedException e)
