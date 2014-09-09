@@ -6,7 +6,7 @@ import java.util.TimerTask;
 
 public class Main
 {
-	static final boolean test = false;
+	static final boolean test = true;
 	
 	static Coord[] createCoords(int num)
 	{
@@ -23,7 +23,6 @@ public class Main
 		if (test)
 		{
 			new Timer().scheduleAtFixedRate(new TimerTask() {
-
 				@Override
 				public void run()
 				{
@@ -32,13 +31,13 @@ public class Main
 		}
 		else
 		{
-			double timePerDownload = 20;
+			double timePerDownload = 17;
 			double desiredTime = 30 * 60;
 			int size = (int) Math.sqrt(2 * desiredTime / timePerDownload);
 			System.out.println("Size = " + size);
 			for (int i = 0;; i++)
 			{
-				CostMatrix c = new CostMatrix(createCoords(size));
+				CostMatrix c = new CostMatrix(createCoords(size + (int) (3 * Math.random())));
 				c.download();
 				c.save("output." + System.currentTimeMillis() + "." + i + ".txt");
 			}

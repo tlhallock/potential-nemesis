@@ -16,10 +16,10 @@ import java.io.PrintStream;
 
 final class Downloader
 {
-	static final Point loc1 = new Point(100, 160);
-	static final Point loc2 = new Point(100, 200);
-	static final Point search = new Point(460, 124);
-	static final Point time = new Point(381, 272);
+	static final Point loc1     = new Point(100, 160);
+	static final Point loc2     = new Point(100, 200);
+	static final Point search   = new Point(460, 124);
+	static final Point time     = new Point(381, 272);
 	static final Point distance = new Point(384, 304);
 	
 	static final Robot robot = createRobot();
