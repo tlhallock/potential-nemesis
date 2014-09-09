@@ -11,7 +11,7 @@ python get_distances.py  10  2
 
 ./remove_bad_ones.sh
 
-translate.py
+./translate.py
 cp *.json.dst.out known_distances/
 mv *json* examples/
 
