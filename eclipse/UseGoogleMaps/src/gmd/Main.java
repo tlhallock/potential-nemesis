@@ -1,12 +1,13 @@
 package gmd;
 
 import java.awt.MouseInfo;
+import java.io.FileNotFoundException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Main
 {
-	static final boolean test = true;
+	static final boolean test = false;
 	
 	static Coord[] createCoords(int num)
 	{
@@ -39,7 +40,15 @@ public class Main
 			{
 				CostMatrix c = new CostMatrix(createCoords(size + (int) (3 * Math.random())));
 				c.download();
-				c.save("output." + System.currentTimeMillis() + "." + i + ".txt");
+				try
+				{
+					c.save("output/output." + System.currentTimeMillis() + "." + i + ".txt");
+				}
+				catch (FileNotFoundException e)
+				{
+					e.printStackTrace();
+				}
+				System.out.println("Restarting the process...");
 			}
 		}
 	}

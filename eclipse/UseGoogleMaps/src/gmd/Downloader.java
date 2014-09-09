@@ -16,11 +16,19 @@ import java.io.PrintStream;
 
 final class Downloader
 {
-	static final Point loc1     = new Point(100, 160);
-	static final Point loc2     = new Point(100, 200);
-	static final Point search   = new Point(460, 124);
-	static final Point time     = new Point(381, 272);
-	static final Point distance = new Point(384, 304);
+	
+//	static final Point loc1     = new Point(100, 160);
+//	static final Point loc2     = new Point(100, 200);
+//	static final Point search   = new Point(460, 124);
+//	static final Point time     = new Point(381, 272);
+//	static final Point distance = new Point(384, 304);
+
+	static final Point loc1     = new Point(153, 201);
+	static final Point loc2     = new Point(149, 240);
+	static final Point search   = new Point(524, 159);
+	static final Point time     = new Point(435, 330);
+	static final Point distance = new Point(430, 354);
+	
 	
 	static final Robot robot = createRobot();
 	static Robot createRobot() {
@@ -56,48 +64,57 @@ final class Downloader
 	static DownloadData rdownload(Coord c1, Coord c2)
 	{
 		long s = System.currentTimeMillis();
-		try (PrintStream ps = new PrintStream(new FileOutputStream ("downloadedInfo.txt", true)))
-		{
-			String str = "Trying to download " + c1.x + "," + c1.y + "\t" + c2.x + "," + c2.y;
-			ps.println(str);
-			System.out.println(str);
-		} catch (FileNotFoundException e) {}
 		
-		try 
+		for (int i=0; i<3; i++)
 		{
-			type(loc1, c1.x + "," + c1.y);
-			type(loc2, c2.x + "," + c2.y);
-
-			robot.setAutoDelay(100);
-			Thread.sleep(1000);
-			moveDaMouse(search);
-			robot.mousePress(MouseEvent.BUTTON1_MASK);
-			robot.mouseRelease(MouseEvent.BUTTON1_MASK);
-			
-			// zoom animation
-			Thread.sleep(2000);
-
-			String desc1 = getStringAt(loc1);
-			String desc2 = getStringAt(loc2);
-			
-			String distString =  getStringAt(distance);
-			String timeString =  getStringAt(time);
-
 			try (PrintStream ps = new PrintStream(new FileOutputStream ("downloadedInfo.txt", true)))
 			{
-				ps.println(desc1); System.out.println(desc1);
-				ps.println(desc2); System.out.println(desc2);
-				ps.println(distString); System.out.println(distString);
-				ps.println(timeString); System.out.println(timeString);
-				ps.println("=============================================");
+				String str = "Trying to download " + c1.x + "," + c1.y + "\t" + c2.x + "," + c2.y;
+				ps.println(str);
+				System.out.println(str);
 			} catch (FileNotFoundException e) {}
 			
-			System.out.println("t = " + (System.currentTimeMillis() - s));
-			return new DownloadData(timeString, distString, desc1, desc2);
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
+			try 
+			{
+				type(loc1, c1.x + "," + c1.y);
+				type(loc2, c2.x + "," + c2.y);
+	
+				robot.setAutoDelay(100);
+				Thread.sleep(1000);
+				moveDaMouse(search);
+				robot.mousePress(MouseEvent.BUTTON1_MASK);
+				robot.mouseRelease(MouseEvent.BUTTON1_MASK);
+				
+				// zoom animation
+				Thread.sleep(2000);
+	
+				String desc1 = getStringAt(loc1);
+				String desc2 = getStringAt(loc2);
+				
+				String distString =  getStringAt(distance);
+				String timeString =  getStringAt(time);
+
+				DownloadData ret = new DownloadData(timeString, distString, desc1, desc2);
+				
+				try (PrintStream ps = new PrintStream(new FileOutputStream ("downloadedInfo.txt", true)))
+				{
+					ps.println(ret);
+					System.out.println(ret);
+					ps.println("=============================================");
+				} catch (FileNotFoundException e) {}
+				System.out.println("t = " + (System.currentTimeMillis() - s));
+				
+				if (!ret.isValid())
+				{
+					continue;
+				}
+				return ret;
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
+				continue;
+			}
 		}
 		
 		return new DownloadData();

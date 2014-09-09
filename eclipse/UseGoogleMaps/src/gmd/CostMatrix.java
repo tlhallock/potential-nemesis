@@ -1,11 +1,14 @@
 package gmd;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
 final class CostMatrix
 {
 	final Coord[] coords;
-	final long[][] distances, durations;
+	final double[][] distances, durations;
 	
-	CostMatrix(Coord[] cs) { coords = cs; distances = new long[cs.length][cs.length]; durations = new long[cs.length][cs.length]; }
+	CostMatrix(Coord[] cs) { coords = cs; distances = new double[cs.length][cs.length]; durations = new double[cs.length][cs.length]; }
 	
 	void download()
 	{
@@ -15,6 +18,7 @@ final class CostMatrix
 			{
 				if (i != j)
 				{
+					System.out.println(i + "/" + coords.length + ", " + j + "/" + coords.length);
 					download(i, j);
 				}
 			}
@@ -36,13 +40,23 @@ final class CostMatrix
 		}
 	}
 	
-	void save(String filename)
-	{
-		for (int i = 0; i < coords.length; i++)
+	void save(String filename) throws FileNotFoundException {
+		try (PrintStream out = new PrintStream(filename))
 		{
-			for (int j = 0; j < coords.length; j++)
+			out.println(coords.length);
+			for (int i = 0; i < coords.length; i++)
 			{
-				System.out.println(i + ", " + j + "\t" + durations[i][j] + "\t" + distances[i][j]);
+				out.println(i + "\t" + coords[i].x + "\t" + coords[i].y + "\t'" + coords[i].desc + "'");
+			}
+			
+			for (int i = 0; i < coords.length; i++)
+			{
+				for (int j = 0; j < coords.length; j++)
+				{
+					String str = i + "\t" + j + "\t" + durations[i][j] + "\t" + distances[i][j];
+					System.out.println(str);
+					out.println(str);
+				}
 			}
 		}
 	}
