@@ -7,6 +7,8 @@
 
 #include "Guess.h"
 
+#include "config.h"
+
 #include <float.h>
 
 Guess::Guess() :
@@ -17,6 +19,16 @@ Guess::~Guess() {}
 
 bool Guess::is_better_than(const Guess &other) const
 {
+#if DONT_INCLUDE_ZERO_ANSWERS
+	if (other.get_answer() == 0)
+	{
+		return true;
+	}
+	else if (get_answer() == 0)
+	{
+		return false;
+	}
+#endif
 	return cost < other.cost;
 }
 

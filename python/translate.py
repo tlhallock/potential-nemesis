@@ -11,7 +11,7 @@ def write_object(f, js):
 	coo = get_coords(f);
 	l = len(js['destination_addresses'])
 	delim = "\t"
-	fout = f + ".dst.out"
+	fout = os.getcwd() + "/" + f + ".dst.out"
 	print(fout)
 	out = open(fout, "w")
 	out.write(str(l) + "\n")
@@ -37,5 +37,7 @@ for f in os.listdir("."):
 		continue
 	if not f.endswith(".json"):
 		continue
-	write_object(f, get_json(f))
-	
+	try:
+		write_object(f, get_json(f))
+	except:
+		pass

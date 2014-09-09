@@ -7,6 +7,8 @@
 
 #include "DistanceSet.h"
 
+#include "config.h"
+
 #include <algorithm>
 #include <float.h>
 #include <fstream>
@@ -97,7 +99,7 @@ const Point& DistanceSet::get_point(int index) const
 	return points.at(index);
 }
 
-const double& DistanceSet::get_distance_between(int index1, int index2) const
+double DistanceSet::get_time_between(int index1, int index2) const
 {
 	return durations[index1][index2];
 }
@@ -121,16 +123,45 @@ int DistanceSet::get_closest_point(const Point& other) const
 	return min_index;
 }
 
+Guess DistanceSet::make_guess(int idx1, int idx2, const Point &p1, const Point &p2) const
+{
+	double c1 = get_point(idx1).get_euclidean_distance(p1);
+	double c2 = get_point(idx2).get_euclidean_distance(p1);
+	double cost = c1 + c2;
+	return Guess { cost, TIME_PER_COORD * (c1 + c2) + get_time_between(idx1, idx2)};
+}
+
+
 
 Guess DistanceSet::get_best_guess(const Point &p1, const Point &p2) const
 {
+#if DONT_INCLUDE_ZERO_ANSWERS
+	Guess g;
+
+	int size = points.size();
+	for (int idx1 = 0; idx1 < size; idx1++)
+	{
+		for (int idx2 = 0; idx2 < size; idx2++)
+		{
+			if (idx1 == idx2)
+			{
+				continue;
+			}
+
+			Guess another = make_guess(idx1, idx2, p1, p2);
+			if (another.is_better_than(g))
+			{
+				g = another;
+			}
+		}
+	}
+
+	return g;
+#else
 	int idx1 = get_closest_point(p1);
 	int idx2 = get_closest_point(p2);
-
-	return Guess {
-		get_point(idx1).get_euclidean_distance(p1) + get_point(idx2).get_euclidean_distance(p1),
-		TIME_PER_COORD * (get_point(idx1).get_euclidean_distance(p1) + get_point(idx2).get_euclidean_distance(p1))
-			+ get_distance_between(idx1, idx2)};
+	return make_guess(idx1, idx2, p1, p2);
+#endif
 }
 
 double** DistanceSet::make_array(int dim)
@@ -173,19 +204,19 @@ void DistanceSet::delete_array(double **array, int dim)
 
 void expand_bounds(Point& lower, Point& upper, const Point& another_point)
 {
-	if (lower.get_x() < another_point.get_x())
+	if (another_point.get_x() < lower.get_x())
 	{
 		lower.set_x(another_point.get_x());
 	}
-	if (lower.get_y() < another_point.get_y())
+	if (another_point.get_y() < lower.get_y())
 	{
 		lower.set_y(another_point.get_y());
 	}
-	if (upper.get_x() > another_point.get_x())
+	if (another_point.get_x() > upper.get_x())
 	{
 		upper.set_x(another_point.get_x());
 	}
-	if (upper.get_y() > another_point.get_y())
+	if (another_point.get_y() > upper.get_y())
 	{
 		upper.set_y(another_point.get_y());
 	}
@@ -248,4 +279,3 @@ double DistanceSet::get_average_time_per_meter() const
 	}
 	return sum / count;
 }
-

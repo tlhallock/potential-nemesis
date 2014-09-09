@@ -7,11 +7,15 @@
 
 #include "DistanceSetSet.h"
 
+
 #include <iostream>
 #include <fstream>
+#include <iomanip>
+#include <set>
+#include <algorithm>
+#include <sstream>
 
 #include <float.h>
-
 
 int main(int argc, char **argv)
 {
@@ -28,6 +32,9 @@ int main(int argc, char **argv)
 	Point lower;
 	Point upper;
 
+	// Denver lower bound:  39.558185, -105.226243
+	// Denver upper bound:  40.211516, -104.745591
+
 	s.find_bounds(lower, upper);
 	std::cout << "bounds: " << lower << " to " << upper << std::endl;
 
@@ -36,8 +43,27 @@ int main(int argc, char **argv)
 
 	std::cout << "to search: " << p1 << " to " << p2 << std::endl;
 
-	Guess g = s.get_best_guess(p1, p2);
-	std::cout << "Guess: " << g << std::endl;
+	std::cout << "Euclidean distance: " << p1.get_euclidean_distance(p2) << std::endl << std::endl;
+
+	std::cout << "Guess: " << s.get_best_guess(p1, p2) << std::endl << std::endl;
+
+
+	std::vector<std::string> output;
+	for (int i = 0; i < 10; i++)
+	{
+		p1 = get_random_point(lower, upper);
+		p2 = get_random_point(lower, upper);
+		Guess cost = s.get_best_guess(p1, p2);
+
+		std::stringstream ss;
+		ss << std::left << std::setw(12) << p1.get_euclidean_distance(p2) << " - "
+				<< std::left << std::setw(12) << cost.get_answer() << " - "
+				<< std::left << std::setw(12) << cost.get_cost();
+		output.push_back(ss.str());
+	}
+	std::cout << "Euclidean    - Time         - Cost" << std::endl;
+	std::sort(output.begin(), output.end(), [](const std::string &s1, const std::string &s2) { return s1 < s2; });
+	std::for_each(output.begin(), output.end(), [](const std::string &s) { std::cout << s << std::endl; });
 
 	return 0;
 }

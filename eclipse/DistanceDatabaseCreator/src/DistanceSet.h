@@ -20,7 +20,7 @@ public:
 	virtual ~DistanceSet();
 
 	const Point &get_point(int index) const;
-	const double &get_distance_between(int index1, int index2) const;
+	double get_time_between(int index1, int index2) const;
 	int get_closest_point(const Point &other) const;
 
 	Guess get_best_guess(const Point &p1, const Point &p2) const;
@@ -34,6 +34,7 @@ public:
 private:
 	double **make_array(int dim);
 	void delete_array(double **array, int dim);
+	Guess make_guess(int idx1, int idx2, const Point &p1, const Point &p2) const;
 
 	std::vector<Point> points;
 	double **distances;

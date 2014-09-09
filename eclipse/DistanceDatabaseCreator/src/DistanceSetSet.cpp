@@ -7,6 +7,8 @@
 
 #include "DistanceSetSet.h"
 
+#include "config.h"
+
 #include <fstream>
 #include <iostream>
 
@@ -14,6 +16,10 @@ DistanceSetSet::DistanceSetSet(const std::string &filename)
 {
 	std::string line;
 	std::ifstream in {filename};
+	if (!in.is_open())
+	{
+		return;
+	}
 
 	while (getline(in, line))
 	{
@@ -61,15 +67,25 @@ double DistanceSetSet::get_average_cost(int num_iters) const
 	Point lower;
 	find_bounds(lower, upper);
 
+	int count = 0;
 	for (int i = 0; i < num_iters; i++)
 	{
 		Point p1 = get_random_point(lower, upper);
 		Point p2 = get_random_point(lower, upper);
 
-		sum += get_best_guess(p1, p2).get_cost();
+		Guess g = get_best_guess(p1, p2);
+#if DONT_INCLUDE_ZERO_ANSWERS
+		if (g.get_answer() == 0)
+		{
+			continue;
+		}
+#endif
+
+		count++;
+		sum += g.get_cost();
 	}
 
-	return sum / num_iters;
+	return sum / count;
 }
 
 double DistanceSetSet::get_average_time(int num_iters) const
@@ -80,15 +96,25 @@ double DistanceSetSet::get_average_time(int num_iters) const
 	Point lower;
 	find_bounds(lower, upper);
 
+	int count = 0;
 	for (int i = 0; i < num_iters; i++)
 	{
 		Point p1 = get_random_point(lower, upper);
 		Point p2 = get_random_point(lower, upper);
 
-		sum += get_best_guess(p1, p2).get_answer();
+		Guess g = get_best_guess(p1, p2);
+#if DONT_INCLUDE_ZERO_ANSWERS
+		if (g.get_answer() == 0)
+		{
+			continue;
+		}
+#endif
+
+		count++;
+		sum += g.get_answer();
 	}
 
-	return sum / num_iters;
+	return sum / count;
 }
 
 void DistanceSetSet::find_bounds(Point& lower, Point& upper) const
