@@ -24,14 +24,11 @@
 # Eclipse
 eclipse/SamsHauling/Debug
 eclipse/.metadata/
-eclipse/SamsHauling/nearest.sol.svg
-eclipse/SamsHauling/random.req.svg
-eclipse/SamsHauling/random.sol.svg
 eclipse/SamsHauling/requests.txt
 eclipse/SamsHauling/spoke.sol.svg
 eclipse/DistanceDatabaseCreator/Debug/
 eclipse/DistanceDatabaseCreator/.settings/
-eclipse/SamsHauling/sol.random.txt
-eclipse/SamsHauling/sol.spoke.txt
-eclipse/SamsHauling/sol.nearest.txt
 python/examples
+eclipse/SamsHauling/*.sol.svg
+eclipse/SamsHauling/sol.*.txt
+eclipse/SamsHauling/random.req.svg

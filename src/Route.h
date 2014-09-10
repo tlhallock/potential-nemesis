@@ -19,6 +19,7 @@ class Route {
 
 public:
 	Route();
+	Route(const Route &other);
 	virtual ~Route();
 
 	sh_time_t get_time_taken() const;

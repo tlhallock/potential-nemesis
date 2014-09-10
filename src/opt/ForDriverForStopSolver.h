@@ -16,7 +16,7 @@ public:
 	ForDriverForStopSolver(const Parameters &p);
 	~ForDriverForStopSolver();
 
-	Solution *solve(const City &city);
+	Solution solve(const City &city);
 protected:
 	virtual action_ptr get_next_request(
 			const City &city,

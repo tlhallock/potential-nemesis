@@ -186,11 +186,11 @@ void svg_print_city(const std::string &filename, const City &city, const Paramet
 	print_postamble(svg_stream);
 }
 
-void svg_print_solution(const std::string &filename, const Solution *solution, const Parameters &p)
+void svg_print_solution(const std::string &filename, const Solution &solution, const Parameters &p)
 {
 	std::ofstream svg_stream { filename + ".sol.svg" };
-	print_preamble(svg_stream, "solution", p);
-	print_solution(svg_stream, *solution);
+	print_preamble(svg_stream, filename, p);
+	print_solution(svg_stream, solution);
 	print_postamble(svg_stream);
 }
 

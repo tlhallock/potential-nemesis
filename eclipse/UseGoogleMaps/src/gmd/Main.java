@@ -7,7 +7,7 @@ import java.util.TimerTask;
 
 public class Main
 {
-	static final boolean test = false;
+	static final boolean test = true;
 	
 	static Coord[] createCoords(int num)
 	{

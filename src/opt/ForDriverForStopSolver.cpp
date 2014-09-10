@@ -12,9 +12,10 @@
 ForDriverForStopSolver::ForDriverForStopSolver(const Parameters &p) : Solver{p} {}
 ForDriverForStopSolver::~ForDriverForStopSolver() {}
 
-Solution* ForDriverForStopSolver::solve(const City &city)
+Solution ForDriverForStopSolver::solve(const City &city)
 {
 	int num_drivers = p.get_num_drivers();
+
 	Solution *s = new Solution { num_drivers };
 	while (true)
 	{
@@ -56,5 +57,5 @@ Solution* ForDriverForStopSolver::solve(const City &city)
 		}
 	}
 
-	return s;
+	return *s;
 }

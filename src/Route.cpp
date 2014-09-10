@@ -18,6 +18,11 @@ Route::Route()
 	requests.push_back(get_start_action());
 }
 
+Route::Route(const Route &other)
+{
+	requests.insert(requests.begin(), other.requests.begin(), other.requests.end());
+}
+
 Route::~Route() {}
 
 bool Route::can_service_next(action_ptr req) const

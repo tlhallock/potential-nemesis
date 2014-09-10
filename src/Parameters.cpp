@@ -12,7 +12,7 @@ Parameters::~Parameters() {}
 
 int Parameters::get_num_drivers() const
 {
-	return 1;
+	return 3;
 }
 
 int Parameters::num_random_requests() const

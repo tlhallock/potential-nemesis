@@ -10,16 +10,23 @@
 
 #include "common.h"
 
+#include <memory>
+
 class Solution;
 
 class Cost
 {
 public:
-	Cost(const Solution &s);
 	Cost();
+	Cost(const Solution &s);
+	Cost(const std::shared_ptr<Solution> &s);
 	~Cost();
 
-	bool is_better_than(const Cost *other);
+	bool is_better_than(const Cost &other) const;
+
+	int get_number_serviced() const;
+
+	bool operator< (const Cost &other);
 private:
 	int num_serviced;
 	sh_time_t time;

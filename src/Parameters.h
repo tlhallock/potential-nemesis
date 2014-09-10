@@ -12,7 +12,6 @@ class Parameters
 {
 public:
 	Parameters();
-
 	~Parameters();
 
 	int get_num_drivers() const;

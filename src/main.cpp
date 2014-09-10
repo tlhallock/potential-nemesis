@@ -5,6 +5,7 @@
 #include "opt/RandomGeneratorSolver.h"
 #include "opt/NearestPointSolver.h"
 #include "opt/SpokeSolver.h"
+#include "gntc/GeneticSolver.h"
 
 #include "SvgPrinter.h"
 
@@ -14,14 +15,15 @@
 
 #include <unistd.h>
 
-void test_solver(Solver *slvr, const City &requests)
+void test_solver(Solver &&solver, const City &requests, bool best_of_many = true)
 {
-	BestOfManySolver solver { slvr->get_params(), slvr, 100 };
-	std::unique_ptr<Solution> s {solver.solve(requests)};
-	std::cout << "Optimal " << slvr->get_name() << " solution n=" << s->get_num_requests_serviced() << std::endl;
-	svg_print_solution(slvr->get_name(), s.get(), slvr->get_params());
-	std::ofstream log {"sol." + slvr->get_name() + ".txt" };
-	log << *s << std::endl;
+	std::string name = solver.get_name();
+	const Parameters &p = solver.get_params();
+	Solution sol = solver.solve(requests);
+	std::cout << "Optimal " << name << " solution n=" << sol.get_num_requests_serviced() << std::endl;
+	svg_print_solution(name, sol, p);
+	std::ofstream log {"sol." + name + ".txt" };
+	log << sol << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -42,11 +44,19 @@ int main(int argc, char **argv)
 		std::cout << city << std::endl;
 	}
 
-	test_solver(new RandomGeneratorSolver {p}, city);
-	test_solver(new NearestPointSolver {p}, city);
-	test_solver(new SpokeSolver {p}, city);
+	int num_to_try = 100;
+
+	test_solver(BestOfManySolver { new RandomGeneratorSolver {p}, num_to_try }, city);
+	test_solver(BestOfManySolver { new NearestPointSolver {p},    num_to_try }, city);
+	test_solver(BestOfManySolver { new SpokeSolver {p},           num_to_try }, city);
+
+	// Right now, these should be about equivalent.
+	test_solver(GeneticSolver {p, num_to_try, new RandomGeneratorSolver {p}}, city, false);
+	test_solver(GeneticSolver {p, num_to_try, new NearestPointSolver {p}},    city, false);
+	test_solver(GeneticSolver {p, num_to_try, new SpokeSolver {p}},           city, false);
 
 	std::cout << "total=" << city.get_num_requests() << std::endl;
 
 	return 0;
 }
+

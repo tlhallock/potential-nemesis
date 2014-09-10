@@ -14,6 +14,7 @@ class Solution
 {
 public:
 	Solution(int num_drivers);
+	Solution(const Solution &other);
 	~Solution();
 
 	sh_time_t get_time_taken() const;
@@ -25,6 +26,7 @@ public:
 	bool already_serviced(const action_ptr &r) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Solution& r);
+	Solution& operator=(const Solution& other);
 private:
 	std::vector<Route *> routes;
 };

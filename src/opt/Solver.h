@@ -20,7 +20,8 @@ public:
 	Solver(const Parameters &p);
 	virtual ~Solver();
 
-	virtual Solution *solve(const City &city) = 0;
+	// This could be more efficient if Solution was an out parameter...
+	virtual Solution solve(const City &city) = 0;
 	virtual std::string get_name() const = 0;
 
 	const Parameters get_params() const;

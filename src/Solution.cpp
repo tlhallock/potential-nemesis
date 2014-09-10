@@ -15,6 +15,29 @@ Solution::Solution(int num_drivers)
 	}
 }
 
+Solution::Solution(const Solution& other)
+{
+	int size = other.get_num_drivers();
+	for (int i = 0; i < size; i++)
+	{
+		routes.push_back(new Route {other.get_route(i)});
+	}
+}
+
+Solution& Solution::operator =(const Solution& other)
+{
+	routes.clear();
+
+	int size = other.get_num_drivers();
+	for (int i = 0; i < size; i++)
+	{
+		routes.push_back(new Route {other.get_route(i)});
+	}
+
+	return *this;
+}
+
+
 Solution::~Solution()
 {
 	int num_drivers = get_num_drivers();

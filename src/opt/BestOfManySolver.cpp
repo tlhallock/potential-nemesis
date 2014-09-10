@@ -8,8 +8,8 @@
 #include "opt/BestOfManySolver.h"
 #include "opt/Cost.h"
 
-BestOfManySolver::BestOfManySolver(const Parameters &p, Solver *delegate_, int max_iters_) :
-	Solver {p},
+BestOfManySolver::BestOfManySolver(Solver *delegate_, int max_iters_) :
+	Solver {delegate_->get_params()},
 	delegate(delegate_),
 	max_iters(max_iters_) {}
 
@@ -18,15 +18,15 @@ BestOfManySolver::~BestOfManySolver()
 	delete delegate;
 }
 
-Solution* BestOfManySolver::solve(const City &city)
+Solution BestOfManySolver::solve(const City &city)
 {
 	if (delegate == nullptr)
 	{
-		return nullptr;
+		return Solution {p.get_num_drivers()};
 	}
 
-	Solution *s = nullptr;
-	Cost *cost = nullptr;
+	Solution s {p.get_num_drivers()};
+	Cost cost;
 
 	int count = 0;
 	for (;;)
@@ -36,19 +36,15 @@ Solution* BestOfManySolver::solve(const City &city)
 			break;
 		}
 
-		Solution *next = delegate->solve(city);
-		Cost *another = new Cost{*next};
+		Solution next = delegate->solve(city);
+		Cost another {next};
 
-		if (!another->is_better_than(cost))
+		if (!(another < cost))
 		{
-			delete next;
-			delete another;
 			continue;
 		}
 
-		delete s;
 		s = next;
-		delete cost;
 		cost = another;
 
 		count = 0;
@@ -59,5 +55,5 @@ Solution* BestOfManySolver::solve(const City &city)
 
 std::string BestOfManySolver::get_name() const
 {
-	return "best_of_many";
+	return "best_of_many[" + delegate->get_name() + "]";
 }
