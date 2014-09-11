@@ -26,6 +26,11 @@ Solution::Solution(const Solution& other)
 
 Solution& Solution::operator =(const Solution& other)
 {
+	int num_drivers = get_num_drivers();
+	for (int i = 0; i < num_drivers; i++)
+	{
+		delete routes.at(i);
+	}
 	routes.clear();
 
 	int size = other.get_num_drivers();

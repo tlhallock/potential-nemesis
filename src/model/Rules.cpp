@@ -74,24 +74,15 @@ inline bool operation_follows(Operation prev_operation, Operation next_operation
 {
 	switch (prev_operation)
 	{
+		case Store:
 		case DropOff:
 			return next_operation == PickUp
 					|| next_operation == UnStore;
-		case Store:
-			return next_operation == PickUp
-					// NOT next_operation == UnStore, we don't want to unstore directly after storing
-									// not until we have limits on staging units
-					;
+		case UnStore:
 		case Dump:
 			return next_operation == DropOff
 					|| next_operation == Replace
 					|| next_operation == Store;
-		case UnStore:
-			return next_operation == DropOff
-					|| next_operation == Replace
-					// NOT next_operation == Store, we don't want to store directly after unstoring,
-									// not until we have limits on staging units
-					;
 		case PickUp:
 		case Replace:
 			return next_operation == Dump;
@@ -99,6 +90,15 @@ inline bool operation_follows(Operation prev_operation, Operation next_operation
 			std::cout << "Should never reach this code." << std::endl;
 			return false;
 	}
+}
+
+bool is_possible(const action_ptr prev_action, const action_ptr action, const sh_time_t start_time, const Solution * const s)
+{
+	return		start_time < sh_time_look_ahead
+			&& operation_follows(prev_action->get_operation(), action->get_operation())
+			&& action->follows_in_time(start_time, *prev_action.get())
+			&& !s->already_serviced(action)
+			&& sizes_match(prev_action, action);
 }
 
 std::vector<action_ptr>* get_possibles(
@@ -117,10 +117,7 @@ std::vector<action_ptr>* get_possibles(
 //		std::cout << "Prev " << *prev_action.get() << std::endl;
 //		std::cout << "Consider " << *action.get() << std::endl;
 
-		if (            operation_follows(prev_action->get_operation(), action->get_operation())
-				&& action->follows_in_time(start_time, *prev_action.get())
-				&& !s->already_serviced(action)
-				&& sizes_match(prev_action, action))
+		if (is_possible(prev_action, action, start_time, s))
 		{
 			actions->push_back(action);
 		}

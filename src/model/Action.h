@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <memory>
+#include <map>
 
 class Request;
 
@@ -54,5 +55,8 @@ typedef std::shared_ptr<const Action> action_ptr;
 action_ptr get_start_action();
 
 std::string get_size_text(const Action &a);
+
+typedef std::map<const Operation, const Location> operation_location_constraint;
+bool satisfies_operation_constraint(const action_ptr &action, const operation_location_constraint& constraint);
 
 #endif /* ACTION_H_ */

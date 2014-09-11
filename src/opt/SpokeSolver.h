@@ -8,9 +8,9 @@
 #ifndef SPOKESOLVER_H_
 #define SPOKESOLVER_H_
 
-#include "opt/ForDriverForStopSolver.h"
+#include "opt/NearestPointSolver.h"
 
-class SpokeSolver : public ForDriverForStopSolver
+class SpokeSolver : public NearestPointSolver
 {
 public:
 	SpokeSolver(const Parameters &p);
@@ -18,16 +18,10 @@ public:
 
 	std::string get_name() const;
 protected:
-	action_ptr get_next_request(
-			const City &city,
-			const Solution *s,
-			std::vector<action_ptr> *possibles,
-			int driver);
+	const operation_location_constraint &get_constraints(const City &city, int driver);
+
 private:
-
-	const Landfill* get_location(const City &c, int i);
-
-	std::vector<const Landfill *> locations;
+	std::vector<operation_location_constraint> constraints;
 };
 
 #endif /* SPOKESOLVER_H_ */

@@ -5,7 +5,9 @@
 #include "opt/RandomGeneratorSolver.h"
 #include "opt/NearestPointSolver.h"
 #include "opt/SpokeSolver.h"
+
 #include "gntc/GeneticSolver.h"
+#include "gntc/SubcycleBreeder.h"
 
 #include "SvgPrinter.h"
 
@@ -31,7 +33,8 @@ int main(int argc, char **argv)
 	// to do: add time to the action when the staging area has a time/cost...
 	// make a separate action for the an action satisfying a request (request =/= action)
 
-	srand(time(NULL));
+//	srand(time(NULL));
+	srand(5000013);
 	Parameters p;
 
 	City city = generate_city(p);
@@ -51,7 +54,7 @@ int main(int argc, char **argv)
 	test_solver(BestOfManySolver { new SpokeSolver {p},           num_to_try }, city);
 
 	// Right now, these should be about equivalent.
-	test_solver(GeneticSolver {p, num_to_try, new RandomGeneratorSolver {p}}, city, false);
+	test_solver(GeneticSolver {p, num_to_try, new RandomGeneratorSolver {p}, 50, new SubcycleBreeder{}}, city, false);
 	test_solver(GeneticSolver {p, num_to_try, new NearestPointSolver {p}},    city, false);
 	test_solver(GeneticSolver {p, num_to_try, new SpokeSolver {p}},           city, false);
 

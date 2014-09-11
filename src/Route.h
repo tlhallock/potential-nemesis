@@ -26,7 +26,7 @@ public:
 	int get_num_requests_serviced() const;
 
 	bool can_service_next(action_ptr req) const;
-	void service_next(action_ptr req);
+	bool service_next(action_ptr req);
 	const Location &get_current_location() const;
 
 	int get_num_actions() const;

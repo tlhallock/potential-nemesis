@@ -81,14 +81,53 @@ DumpsterSize gen_out_size(Operation o)
 	}
 }
 
+void generate_times(Operation o, sh_time_t &start_time, sh_time_t &stop_time)
+{
+	if (rand() % 10 == 0)
+	{
+		sh_time_t time = rand() % sh_time_look_ahead;
+		start_time  = time - sh_time_window;
+		stop_time = time + sh_time_window;
+
+		return;
+	}
+	if (o == PickUp)
+	{
+		start_time = 0;
+		stop_time = sh_time_look_ahead;
+		return;
+	}
+
+	if (o != Replace && o != DropOff)
+	{
+		std::cout << "We don't get here, do we?  21351351513327357" << std::endl;
+		exit(-1);
+	}
+
+	if (rand() % 2 == 0)
+	{
+		start_time = 0;
+		stop_time = sh_time_look_ahead / 2;
+		return;
+	}
+
+	start_time = sh_time_look_ahead / 2;
+	stop_time = sh_time_look_ahead;
+}
+
 Request generate_request(const Parameters &p)
 {
-	sh_time_t time = rand() % sh_time_look_ahead;
 	Operation o = generate_operation();
+
+	sh_time_t start_time;
+	sh_time_t stop_time;
+
+	generate_times(o, start_time, stop_time);
+
 	return Request { generate_location(p),
 		o,
-		time - sh_time_window,
-		time + sh_time_window,
+		start_time,
+		stop_time,
 		gen_in_size(o),
 		gen_out_size(o)};
 }

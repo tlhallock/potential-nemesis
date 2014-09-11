@@ -21,22 +21,22 @@ class Mutator
 public:
 	Mutator();
 	virtual ~Mutator();
-	virtual void mutate(individual child);
+	virtual void mutate(const City& c, individual child);
 };
 class Breeder
 {
 public:
 	Breeder();
 	virtual ~Breeder();
-	virtual individual breed(individual p1, individual p2);
+	virtual individual breed(const City& c, individual p1, individual p2);
 };
 class Selector
 {
 public:
 	Selector();
 	virtual ~Selector();
-	virtual void select(std::vector<individual> &population, individual new_child, int pop_size);
-	virtual individual get_best(std::vector<individual> &population);
+	virtual void select(const City& c, std::vector<individual> &population, individual new_child, int pop_size);
+	virtual individual get_best(const City& c, std::vector<individual> &population);
 };
 
 class GeneticSolver : public Solver

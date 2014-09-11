@@ -18,10 +18,9 @@ public:
 
 	Solution solve(const City &city);
 protected:
-	virtual action_ptr get_next_request(
+	virtual bool get_next_request(
 			const City &city,
-			const Solution *s,
-			std::vector<action_ptr> *possibles,
+			Solution *s,
 			int driver) = 0;
 };
 

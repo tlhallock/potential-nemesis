@@ -47,7 +47,7 @@ Operation Action::get_operation() const { return o; }
 
 void Action::append_to(std::ostream& os) const
 {
-	os << " a=" << std::left << std::setw(10) << operation_to_string(o) << get_size_text(*this);
+	os << " a='" << std::left << std::setw(10) << operation_to_string(o) << "' " << get_size_text(*this);
 }
 
 bool Action::satisfies(const action_ptr& r) const
@@ -85,3 +85,26 @@ std::string get_size_text(const Action &a)
 {
 	return get_size_text(a.get_input_dumpster_size()) + get_size_text(a.get_output_dumpster_size());
 }
+
+
+
+
+
+
+bool satisfies_operation_constraint(const action_ptr &action, const operation_location_constraint& constraint)
+{
+	auto it = constraint.find(action->get_operation());
+	if (it == constraint.end())
+	{
+		return true;
+	}
+
+	const Location& loc = it->second;
+	return action->get_x() == loc.get_x()
+			&& action->get_y() == loc.get_y();
+}
+
+
+
+
+

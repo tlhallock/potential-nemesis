@@ -10,6 +10,8 @@
 
 #include "opt/ForDriverForStopSolver.h"
 
+#include <map>
+
 class NearestPointSolver : public ForDriverForStopSolver
 {
 public:
@@ -18,11 +20,13 @@ public:
 
 	std::string get_name() const;
 protected:
-	action_ptr get_next_request(
+	bool get_next_request(
 			const City &city,
-			const Solution *s,
-			std::vector<action_ptr> *possibles,
+			Solution *s,
 			int driver);
+
+	const operation_location_constraint &get_constraints(const City& city, int driver);
+	const operation_location_constraint no_constraints;
 };
 
 #endif /* NEARESTPOINTSOLVER_H_ */

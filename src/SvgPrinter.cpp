@@ -14,10 +14,11 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <map>
 
 namespace
 {
-	constexpr double scale_factor = 5;
+	constexpr double scale_factor = 7.5;
 
 	std::string black  {"#000000"};
 	std::string red    {"#ff0000"};
@@ -31,7 +32,9 @@ namespace
 	std::string hex {"0123456789abcdef"};
 	std::string letter_width{"1"};
 	std::string line_width{"1"};
-	std::string font_size{"5"};
+	std::string font_size{"7"};
+
+	int inc_y_iter = 10;
 
 	double print_unit(double a_number)
 	{
@@ -88,12 +91,32 @@ namespace
 		}
 	}
 
+	namespace
+	{
+		// move down each time a request at the same loc is printed...
+		std::map<Location, int> counts;
+		int adjustment_for_already_printed(const Location &old)
+		{
+			auto it = counts.find(old);
+			if (it == counts.end())
+			{
+				counts.insert(std::pair<Location, int> {Location {old}, 1});
+				return 0;
+			}
+			else
+			{
+				return it->second++ * inc_y_iter;
+			}
+		}
+	}
+
 	void print_string(std::ofstream &svg_stream, const Location &location, const std::string &str)
 	{
+
 		std::string color = get_color(str);
 		svg_stream << "\t\t<text xml:space=\"preserve\" text-anchor=\"middle\" font-family=\"Sans\" font-weight=\"lighter\" font-size=\"" << font_size << "\" "
 				<< "id=\"" << next_id()
-				<< "\" y=\"" << print_unit(location.get_y()) << "\" x=\"" << print_unit(location.get_x()) << "\""
+				<< "\" y=\"" << (print_unit(location.get_y()) + adjustment_for_already_printed(location)) << "\" x=\"" << print_unit(location.get_x()) << "\""
 				<< " stroke-width=\"" << letter_width << "\" stroke=\"" << color << "\" fill=\"" << color << "\">"
 				<< str << "</text>" << std::endl;
 	}
@@ -188,6 +211,8 @@ void svg_print_city(const std::string &filename, const City &city, const Paramet
 
 void svg_print_solution(const std::string &filename, const Solution &solution, const Parameters &p)
 {
+	counts.clear(); // reset state
+
 	std::ofstream svg_stream { filename + ".sol.svg" };
 	print_preamble(svg_stream, filename, p);
 	print_solution(svg_stream, solution);

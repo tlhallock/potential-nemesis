@@ -18,10 +18,9 @@ public:
 
 	std::string get_name() const;
 protected:
-	action_ptr get_next_request(
+	bool get_next_request(
 			const City &city,
-			const Solution *s,
-			std::vector<action_ptr> *possibles,
+			Solution *s,
 			int driver);
 };
 

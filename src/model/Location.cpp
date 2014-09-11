@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <iomanip>
+#include <sstream>
 
 Location::Location(double x_, double y_) : x{x_}, y{y_} {}
 Location::Location(const Location& loc) :
@@ -47,3 +48,26 @@ double Location::get_y() const
 	return y;
 }
 
+bool Location::operator <(const Location& other) const
+{
+	if (x == other.x)
+	{
+		return y < other.y;
+	}
+	else
+	{
+		return x < other.x;
+	}
+}
+
+bool Location::operator ==(const Location& other) const
+{
+	return x == other.x && y == other.y;
+}
+
+std::string Location::serialize() const
+{
+	std::stringstream ss;
+	ss << "[" << x << "," << y << "]";
+	return ss.str();
+}

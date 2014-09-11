@@ -13,6 +13,8 @@
 
 bool operation_follows(Operation prev_operation, Operation next_operation);
 
+bool is_possible(const action_ptr prev_action, const action_ptr action, const sh_time_t start_time, const Solution * const s);
+
 std::vector<action_ptr>* get_possibles(
 		const Solution *s,
 		sh_time_t start_time,

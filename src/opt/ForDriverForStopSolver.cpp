@@ -23,32 +23,19 @@ Solution ForDriverForStopSolver::solve(const City &city)
 
 		for (int i = 0; i < num_drivers; i++)
 		{
-			Route &output = s->get_route(i);
-
-			action_ptr a {nullptr};
-			{
-				std::vector<action_ptr> *possibles = get_possibles(
-						s,
-						output.get_time_taken(),
-						output.get_last_action(),
-						city.get_all_actions());
-				std::unique_ptr < std::vector<action_ptr> > dme { possibles };
-
-				if (possibles->size() == 0)
-				{
-					continue;
-				}
-
-				a = get_next_request(city, s, possibles, i);
-			}
-
-			if (a == nullptr)
-			{
-				continue;
-			}
-
-			could_add = true;
-			output.service_next(a);
+			could_add |= get_next_request(city, s, i);
+#if 0
+std::vector<action_ptr> *possibles = get_possibles(
+		s,
+		output.get_time_taken(),
+		output.get_last_action(),
+		city.get_all_actions());
+std::unique_ptr < std::vector<action_ptr> > dme { possibles };
+if (possibles->size() == 0)
+{
+	return action_ptr {nullptr};
+}
+#endif
 		}
 
 		if (!could_add)
@@ -57,5 +44,8 @@ Solution ForDriverForStopSolver::solve(const City &city)
 		}
 	}
 
+	std::unique_ptr<Solution> dme {s};
+
 	return *s;
 }
+

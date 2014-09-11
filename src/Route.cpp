@@ -31,15 +31,16 @@ bool Route::can_service_next(action_ptr req) const
 			&& req->follows_in_time(get_time_taken(), *requests.back().get());
 }
 
-void Route::service_next(action_ptr req)
+bool Route::service_next(action_ptr req)
 {
 	if (!can_service_next(req))
 	{
 		std::cout << "Impossible state: " << *req << " from\n" << *this << std::endl;
-		return;
+		return false;
 	}
 
 	requests.push_back(req);
+	return true;
 }
 
 sh_time_t Route::get_time_taken() const

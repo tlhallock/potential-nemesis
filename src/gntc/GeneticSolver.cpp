@@ -16,15 +16,15 @@
 
 Mutator::Mutator() {}
 Mutator::~Mutator() {}
-void Mutator::mutate(individual child) {}
+void Mutator::mutate(const City& c, individual child) {}
 
 Breeder::Breeder() {}
 Breeder::~Breeder() {}
-individual Breeder::breed(individual p1, individual p2) { return p1; }
+individual Breeder::breed(const City& c, individual p1, individual p2) { return p1; }
 
 Selector::Selector() {}
 Selector::~Selector() {}
-void Selector::select(std::vector<individual>& population, individual new_child, int pop_size)
+void Selector::select(const City& c, std::vector<individual>& population, individual new_child, int pop_size)
 {
 	population.push_back(new_child);
 
@@ -38,7 +38,7 @@ void Selector::select(std::vector<individual>& population, individual new_child,
 		population.erase(population.end());
 	}
 }
-individual Selector::get_best(std::vector<individual>& population)
+individual Selector::get_best(const City& city, std::vector<individual>& population)
 {
 	individual best {population.front()};
 	Cost c {best};
@@ -134,12 +134,12 @@ Solution GeneticSolver::solve(const City& city)
 
 		individual p1 = population.at(rand() % population.size());
 		individual p2 = population.at(rand() % population.size());
-		individual child = breeder->breed(p1, p2);
-		mutator->mutate(child);
-		selector->select(population, child, population_size);
+		individual child = breeder->breed(city, p1, p2);
+		mutator->mutate(city, child);
+		selector->select(city, population, child, population_size);
 
 		count++;
-		int ns = Cost{selector->get_best(population)}.get_number_serviced();
+		int ns = Cost{selector->get_best(city, population)}.get_number_serviced();
 		if (ns > num_serviced)
 		{
 			num_serviced = ns;
@@ -147,6 +147,6 @@ Solution GeneticSolver::solve(const City& city)
 		}
 	}
 
-	return *selector->get_best(population).get();
+	return *selector->get_best(city, population).get();
 }
 
