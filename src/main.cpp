@@ -30,8 +30,35 @@ void test_solver(Solver &&solver, const City &requests, bool best_of_many = true
 
 int main(int argc, char **argv)
 {
-	// to do: add time to the action when the staging area has a time/cost...
-	// make a separate action for the an action satisfying a request (request =/= action)
+#if 0
+	Current and next things I am working on:
+		1. Finish writing the saveXml/loadXml
+			this means fixing the saveXml to write to an xml element
+			rename saveXml -> save_xml
+		2. Implement the maximum number of containers at each staging area
+		3. Make a different class for requests as actions (Request =/= Action)
+		4. Finish implementing the genetic algorithm
+			right now I am working on the breed function
+			Almost all the stubs are empty...
+		5. Add helpfull messages when Route.loadXml fails... almost all the logic for a validator should be there.
+		6. This could use some unit tests :)
+		7. Break off the main methods into: validate <city> <solution>, generate random city <out file>, solve methods <city> <outfile>
+			Probably this will mean making a static .a file and compiling several main files against it.
+			In the process, I should give this a real Makefile, instead of just using eclipse configs.
+		8. Make the parameters also have a saveXml and loadXml method
+			The Parameters class is passed around all the time, should this be static?
+			Need to add types of distributions to this xml file too
+		9. start profiling: I have some guesses why some of this is so slow...
+			cache the get_time_taken()
+			cache the already_services()
+			5% of time is spent in shared_ptr<Action>
+			5% of time is spent in get_distance
+				I would like to use a distance table instead of calculate distances every the time
+				This should be input into the algorithm (instead of x,y points? but then how would we plot it?)
+		10. I should clean up the code, and maybe add comments.
+			saveXml(bad parameter name)
+			Action.get_points() is a bad name
+#endif
 
 	srand(time(NULL));
 	//srand(5000013);
@@ -54,7 +81,7 @@ int main(int argc, char **argv)
 	test_solver(BestOfManySolver { new NearestPointSolver {p},    num_to_try }, city);
 	test_solver(BestOfManySolver { new SpokeSolver {p},           num_to_try }, city);
 
-	// Right now, these should be about equivalent.
+	// Right now, these should be about equivalent because the genetic solver doesn't have any breeding/mutation
 	test_solver(GeneticSolver {p, num_to_try, new RandomGeneratorSolver {p}, 50, new SubcycleBreeder{}}, city, false);
 	test_solver(GeneticSolver {p, num_to_try, new NearestPointSolver {p}},    city, false);
 	test_solver(GeneticSolver {p, num_to_try, new SpokeSolver {p}},           city, false);
