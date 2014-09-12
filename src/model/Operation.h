@@ -37,4 +37,6 @@ Operation char_to_operation(char c);
 std::string size_to_string(DumpsterSize);
 DumpsterSize string_to_size(const char *str);
 
+std::string get_size_text(DumpsterSize size);
+
 #endif /* OPERATION_H_ */

@@ -8,6 +8,7 @@
 #include "model/City.h"
 #include "Solution.h"
 #include "model/FillLand.h"
+#include "model/Service.h"
 
 #include "float.h"
 
@@ -61,24 +62,22 @@ const std::vector<action_ptr>& City::get_all_actions() const
 	return all_actions;
 }
 
-void City::loadXml(const std::string& filename)
+void City::loadXml(const tinyxml2::XMLDocument *document)
 {
-	tinyxml2::XMLDocument doc;
-	doc.LoadFile(filename.c_str());
-	tinyxml2::XMLElement* element = doc.FirstChildElement("city");
+	const tinyxml2::XMLElement* element = document->FirstChildElement("city");
 	if (element == nullptr)
 	{
-		std::cout << "No city found in " << filename << "!" << std::endl;
+		std::cout << "No city found!" << std::endl;
 		exit(-1);
 	}
 
-	tinyxml2::XMLElement* list = element->FirstChildElement();
+	const tinyxml2::XMLElement* list = element->FirstChildElement();
 	while (list != nullptr)
 	{
 		const char* name = list->Name();
 		if (strcmp(name, "landfills") == 0)
 		{
-			tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
+			const tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
 			while (landfill_list != nullptr)
 			{
 				Landfill l;
@@ -89,7 +88,7 @@ void City::loadXml(const std::string& filename)
 		}
 		else if (strcmp(name, "stagingareas") == 0)
 		{
-			tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
+			const tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
 			while (landfill_list != nullptr)
 			{
 				StagingArea l;
@@ -100,13 +99,13 @@ void City::loadXml(const std::string& filename)
 		}
 		else if (strcmp(name, "requests") == 0)
 		{
-			tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
-			while (landfill_list != nullptr)
+			const tinyxml2::XMLElement* requestList = list->FirstChildElement();
+			while (requestList != nullptr)
 			{
-				Request l;
-				l.loadXml(landfill_list);
-				landfill_list = landfill_list->NextSiblingElement();
-				requests.push_back(l);
+				Request r;
+				r.loadXml(requestList);
+				requestList = requestList->NextSiblingElement();
+				requests.push_back(r);
 			}
 		}
 		else
@@ -120,40 +119,36 @@ void City::loadXml(const std::string& filename)
 	}
 }
 
-void City::saveXml(std::ostream& os) const
+tinyxml2::XMLElement* City::saveXml(tinyxml2::XMLDocument *document) const
 {
-	os << "<?xml version=\"1.0\"?>" << std::endl;
-	os << "<city>" << std::endl;
+	tinyxml2::XMLElement* city = document->NewElement("city");
 
-	os << "\t<requests len=\"" << requests.size() << "\">" << std::endl;
-	std::for_each(requests.begin(), requests.end(), [&os](const Request &r)
+	tinyxml2::XMLElement* requestlist = document->NewElement("requests");
+	city->InsertEndChild(requestlist);
+	requestlist->SetAttribute("len", (int) requests.size());
+	std::for_each(requests.begin(), requests.end(), [requestlist](const Request &r)
 	{
-		r.saveXml(os);
+		r.saveXml(requestlist);
 	});
-	os << "\t</requests>" << std::endl;
 
-	os << "\t<landfills len=\"" << land_fills.size() << "\">" << std::endl;
-	std::for_each(land_fills.begin(), land_fills.end(), [&os](const Landfill &r)
+
+	tinyxml2::XMLElement* landfills = document->NewElement("landfills");
+	city->InsertEndChild(landfills);
+	landfills->SetAttribute("len", (int) land_fills.size());
+	std::for_each(land_fills.begin(), land_fills.end(), [landfills](const Landfill &r)
 	{
-		r.saveXml(os);
+		r.saveXml(landfills);
 	});
-	os << "\t</landfills>" << std::endl;
 
-
-	os << "\t<stagingareas len=\"" << staging_areas.size() << "\">" << std::endl;
-	std::for_each(staging_areas.begin(), staging_areas.end(), [&os](const StagingArea &r)
+	tinyxml2::XMLElement* stagingareas = document->NewElement("stagingareas");
+	city->InsertEndChild(stagingareas);
+	stagingareas->SetAttribute("len", (int) staging_areas.size());
+	std::for_each(staging_areas.begin(), staging_areas.end(), [stagingareas](const StagingArea &r)
 	{
-		r.saveXml(os);
+		r.saveXml(stagingareas);
 	});
-	os << "\t</stagingareas>" << std::endl;
-
-	os << "</city>" << std::endl;
-}
-
-void City::saveXml(const std::string& filename) const
-{
-	std::ofstream out {filename};
-	saveXml(out);
+	document->InsertEndChild(city);
+	return city;
 }
 
 void City::refresh_all_actions()
@@ -162,7 +157,7 @@ void City::refresh_all_actions()
 
 	std::for_each(requests.begin(), requests.end(), [this](const Request& r)
 	{
-		all_actions.push_back(action_ptr {new Request {r}});
+		all_actions.push_back(action_ptr {new Service {&r}});
 	});
 	std::for_each(land_fills.begin(), land_fills.end(), [this](const Landfill& l)
 	{

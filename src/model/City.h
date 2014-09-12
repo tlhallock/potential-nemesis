@@ -12,9 +12,11 @@
 #include "model/Landfills.h"
 #include "model/Request.h"
 
+#include "XmlObject.h"
+
 class Solution;
 
-class City
+class City : public XmlRootObject
 {
 public:
 	City();
@@ -38,9 +40,8 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& os, const City& r);
 
-	void loadXml(const std::string &filename);
-	void saveXml(const std::string& filename) const;
-	void saveXml(std::ostream& out) const;
+	void loadXml(const tinyxml2::XMLDocument* document);
+	tinyxml2::XMLElement* saveXml(tinyxml2::XMLDocument* document) const;
 private:
 
 	void refresh_all_actions();

@@ -8,8 +8,8 @@
 #include "opt/NearestPointSolver.h"
 
 #include "opt/OptimizerUtils.h"
-
 #include "model/Rules.h"
+#include "model/Service.h"
 
 #include <algorithm>
 
@@ -51,7 +51,7 @@ bool NearestPointSolver::get_next_request(
 	{
 		const Request& req = city.get_request(i);
 
-		action_ptr next_action { new Request {req} };
+		action_ptr next_action { new Service {&req} };
 
 		if (is_possible(prev_action, next_action, start_time, s))
 		{

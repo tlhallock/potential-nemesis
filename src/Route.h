@@ -14,7 +14,8 @@
 
 class Optimizer;
 
-class Route {
+class Route : public XmlObject
+{
 	friend class Optimizer;
 
 public:
@@ -33,9 +34,12 @@ public:
 	const Action &get_action(int index) const;
 	const action_ptr &get_last_action() const;
 
-	bool already_serviced(const action_ptr &r) const;
+	bool already_serviced(const Request *r) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Route& r);
+
+	virtual void loadXml(const tinyxml2::XMLElement* element);
+	virtual tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
 private:
 	sh_time_t get_time_taken(const int i) const;
 

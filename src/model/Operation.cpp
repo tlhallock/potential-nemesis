@@ -107,23 +107,23 @@ DumpsterSize string_to_size(const char* str)
 		std::cout << "Null in dumpster size!!!!" << std::endl;
 		exit(-1);
 	}
-	else if (strcmp(str, "smallest"))
+	else if (strcmp(str, "smallest") == 0)
 	{
 		return smallest;
 	}
-	else if (strcmp(str, "small"))
+	else if (strcmp(str, "small") == 0)
 	{
 		return small;
 	}
-	else if (strcmp(str, "big"))
+	else if (strcmp(str, "big") == 0)
 	{
 		return big;
 	}
-	else if (strcmp(str, "biggest"))
+	else if (strcmp(str, "biggest") == 0)
 	{
 		return biggest;
 	}
-	else if (strcmp(str, "none"))
+	else if (strcmp(str, "none") == 0)
 	{
 		return none;
 	}
@@ -131,5 +131,19 @@ DumpsterSize string_to_size(const char* str)
 	{
 		std::cout << "Unknown dumpster size string: " << str << std::endl;
 		exit(-1);
+	}
+}
+
+
+std::string get_size_text(DumpsterSize size)
+{
+	switch(size)
+	{
+		case none:	       		return "0";
+		case smallest:			return "1";
+		case small:			return "2";
+		case big:			return "3";
+		case biggest:			return "4";
+		default:			return "*";
 	}
 }

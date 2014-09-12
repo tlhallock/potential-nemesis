@@ -9,10 +9,11 @@
 #define LANDFILLS_H_
 
 #include "model/Location.h"
+#include "XmlObject.h"
 
 #include <vector>
 
-class Landfill : public Location
+class Landfill : public Location, XmlObject
 {
 public:
 	Landfill();
@@ -22,8 +23,8 @@ public:
 	sh_time_t get_wait_time() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Landfill& r);
-	void loadXml(const tinyxml2::XMLElement* landfill_list);
-	void saveXml(std::ostream& out) const;
+	virtual void loadXml(const tinyxml2::XMLElement* element);
+	virtual tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
 private:
 	sh_time_t wait_time;
 };

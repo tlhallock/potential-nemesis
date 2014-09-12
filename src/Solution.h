@@ -10,7 +10,11 @@
 
 #include "Route.h"
 
-class Solution
+#include "XmlObject.h"
+
+class City;
+
+class Solution : public XmlRootObject
 {
 public:
 	Solution(int num_drivers);
@@ -23,10 +27,15 @@ public:
 	int get_num_drivers() const;
 	Route &get_route(int index) const;
 
-	bool already_serviced(const action_ptr &r) const;
+	bool already_serviced(const Request *r) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Solution& r);
 	Solution& operator=(const Solution& other);
+
+	void loadXml(const tinyxml2::XMLDocument* document);
+	tinyxml2::XMLElement* saveXml(tinyxml2::XMLDocument* document) const;
+
+	void validate(const City& city);
 private:
 	std::vector<Route *> routes;
 };

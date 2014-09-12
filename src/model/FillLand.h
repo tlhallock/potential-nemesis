@@ -14,6 +14,7 @@
 class FillLand : public Action
 {
 public:
+	FillLand();
 	FillLand(const Landfill &l, DumpsterSize size);
 	virtual ~FillLand();
 

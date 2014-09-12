@@ -23,11 +23,16 @@ sh_time_t Landfill::get_wait_time() const
 	return wait_time;
 }
 
-void Landfill::loadXml(const tinyxml2::XMLElement* landfill)
+std::ostream& operator<<(std::ostream& os, const Landfill& r)
 {
-	Location::loadXml(landfill);
+	return os << Location {r} << " wait time = " << r.wait_time;
+}
 
-	const tinyxml2::XMLElement* wait = landfill->FirstChildElement("wait");
+void Landfill::loadXml(const tinyxml2::XMLElement* element)
+{
+	Location::loadXml(element);
+
+	const tinyxml2::XMLElement* wait = element->FirstChildElement("wait");
 	if (wait == nullptr)
 	{
 		std::cout << "While parsing landfill: no wait time." << std::endl;
@@ -37,16 +42,17 @@ void Landfill::loadXml(const tinyxml2::XMLElement* landfill)
 		wait->QueryUnsignedAttribute("time", &wait_time);
 	}
 }
-
-void Landfill::saveXml(std::ostream& out) const
+tinyxml2::XMLElement* Landfill::saveXml(tinyxml2::XMLElement* element) const
 {
-	out << "\t\t<landfill>" << std::endl;
-	Location::saveXml(out);
-	out << "\t\t\t<wait time=\"" << wait_time << "\" />" << std::endl;
-	out << "\t\t</landfill>" << std::endl;
-}
+	tinyxml2::XMLElement* landfill = element->GetDocument()->NewElement("landfill");
 
-std::ostream& operator<<(std::ostream& os, const Landfill& r)
-{
-	return os << Location {r} << " wait time = " << r.wait_time;
+	Location::saveXml(landfill);
+
+	tinyxml2::XMLElement* wait = element->GetDocument()->NewElement("wait");
+	wait->SetAttribute("time", wait_time);
+
+	landfill->InsertEndChild(wait);
+	element->InsertEndChild(landfill);
+
+	return landfill;
 }

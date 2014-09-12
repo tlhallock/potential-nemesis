@@ -121,6 +121,11 @@ namespace
 				<< str << "</text>" << std::endl;
 	}
 
+	/** These could both implement the same interface at least. **/
+	std::string action_text(const Request &a)
+	{
+		return operation_to_svg(a.get_operation()) + get_size_text(a);
+	}
 	std::string action_text(const Action &a)
 	{
 		return operation_to_svg(a.get_operation()) + get_size_text(a);

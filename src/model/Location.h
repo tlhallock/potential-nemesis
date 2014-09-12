@@ -10,11 +10,14 @@
 
 #include "common.h"
 
+#include "XmlObject.h"
+
 #include <iostream>
 #include <inttypes.h>
 
 class Location {
 public:
+	Location();
 	Location(double x, double y);
 	Location(const Location &loc);
 	virtual ~Location();
@@ -27,15 +30,11 @@ public:
 	double get_y() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Location& r);
-	virtual void loadXml(const tinyxml2::XMLElement* landfill);
-	virtual void saveXml(std::ostream& out) const;
+	virtual void loadXml(const tinyxml2::XMLElement* element);
+	virtual tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* element) const;
 
 	bool operator==(const Location &other) const;
 	bool operator<(const Location &other) const;
-	std::string serialize() const;
-
-protected:
-	virtual void append_to(std::ostream& os) const;
 private:
 	double x, y;
 };

@@ -10,11 +10,11 @@
 #include <climits>
 #include <iomanip>
 
+
+Action::Action() : Action {Location{} , Store, none, none} {}
 Action::Action(const Location& l_, const Operation& o_, DumpsterSize in, DumpsterSize out) :
 	Location(l_),
-	o(o_),
-	insize(in),
-	outsize(out) {}
+	OperationInfo {o, in, out} {}
 
 Action::~Action() {}
 
@@ -25,12 +25,16 @@ sh_time_t Action::get_time_taken(sh_time_t start_time, const Location& from) con
 
 bool Action::follows_in_time(sh_time_t start_time, const Location& from) const
 {
+	return 0;
+#if CANT_HIT_TOO_EARLY
+
+	// Until i figure out where the follows in time method goes
+
 	sh_time_t time_taken = get_time_taken(start_time, from);
 	return
-#if CANT_HIT_TOO_EARLY
 			time_taken > get_minimum_time() &&
-#endif
 			time_taken < get_maximum_time();
+#endif
 }
 
 action_ptr get_start_action()
@@ -38,58 +42,17 @@ action_ptr get_start_action()
 	return action_ptr {new Action{Location{0, 0}, Store, none, none}};
 }
 
-sh_time_t Action::get_minimum_time() const { return sh_time_min; }
-sh_time_t Action::get_maximum_time() const { return sh_time_max; }
-
 int Action::get_points() const { return 0; }
-
-Operation Action::get_operation() const { return o; }
 
 std::ostream& operator<<(std::ostream& os, const Action& a)
 {
-	return os << Location {a} << " a='" << std::left << std::setw(10) << operation_to_string(a.o) << "' " << get_size_text(a);
+	return os << Location {a} << OperationInfo {a} << std::endl;
 }
 
-bool Action::satisfies(const action_ptr& r) const
+bool Action::satisfies(const Request *request) const
 {
 	return false;
 }
-
-DumpsterSize Action::get_output_dumpster_size() const
-{
-	return outsize;
-}
-
-DumpsterSize Action::get_input_dumpster_size() const
-{
-	return insize;
-}
-
-
-namespace
-{
-inline std::string get_size_text(DumpsterSize size)
-{
-	switch(size)
-	{
-		case none:	       		return "0";
-		case smallest:			return "1";
-		case small:			return "2";
-		case big:			return "3";
-		case biggest:			return "4";
-		default:			return "*";
-	}
-}
-}
-std::string get_size_text(const Action &a)
-{
-	return get_size_text(a.get_input_dumpster_size()) + get_size_text(a.get_output_dumpster_size());
-}
-
-
-
-
-
 
 bool satisfies_operation_constraint(const action_ptr &action, const operation_location_constraint& constraint)
 {
@@ -104,9 +67,9 @@ bool satisfies_operation_constraint(const action_ptr &action, const operation_lo
 			&& action->get_y() == loc.get_y();
 }
 
-void Action::loadXml(const tinyxml2::XMLElement* area)
+void Action::loadXml(const tinyxml2::XMLElement* action)
 {
-	const char *op = area->Attribute("operation");
+	const char *op = action->Attribute("operation");
 	if (op == nullptr)
 	{
 		std::cout << "No operation for action!!!!" << std::endl;
@@ -114,26 +77,26 @@ void Action::loadXml(const tinyxml2::XMLElement* area)
 	}
 	o = char_to_operation(*op);
 
-	insize = string_to_size(area->Attribute("in"));
-	outsize = string_to_size(area->Attribute("out"));
-	Location::loadXml(area);
+	insize = string_to_size(action->Attribute("in"));
+	outsize = string_to_size(action->Attribute("out"));
+
+	Location::loadXml(action);
 }
 
-void Action::saveXml(std::ostream& out) const
+tinyxml2::XMLElement* Action::saveXml(tinyxml2::XMLElement* parent) const
 {
-	out << "\t\t<" << get_xml_name();
-	out << " operation=\"" << operation_to_svg(o) << "\"";
-	out << " in=\"" << size_to_string(insize) << "\"";
-	out << " out=\"" << size_to_string(outsize) << "\">" << std::endl;
-	Location::saveXml(out);
-	// should have been better about this: this should save to an xml document too...
-	child_save_xml(out);
-	out << "\t\t</" << get_xml_name() << ">" << std::endl;
+	tinyxml2::XMLElement* action = parent->GetDocument()->NewElement("action");
+	action->SetAttribute("operation", operation_to_svg(o).c_str());
+	action->SetAttribute("in", size_to_string(insize).c_str());
+	action->SetAttribute("out", size_to_string(outsize).c_str());
+	Location::saveXml(action);
+	parent->InsertEndChild(action);
+
+	return action;
+
 }
 
-void Action::child_save_xml(std::ostream& out) const {}
-
-std::string Action::get_xml_name() const
+const Request* Action::get_serviced_request() const
 {
-	return "action";
+	return nullptr;
 }

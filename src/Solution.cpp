@@ -7,6 +7,8 @@
 
 #include "Solution.h"
 
+#include "model/City.h"
+
 Solution::Solution(int num_drivers)
 {
 	for (int i = 0; i < num_drivers; i++)
@@ -105,7 +107,59 @@ std::ostream& operator<<(std::ostream& os, const Solution& r)
 	return os;
 }
 
-bool Solution::already_serviced(const action_ptr& r) const
+bool Solution::already_serviced(const Request *r) const
 {
+	if (r == nullptr)
+	{
+		return false;
+	}
+
 	return std::any_of(routes.begin(), routes.end(), [&r](const Route *route) { return route->already_serviced(r); });
+}
+
+void Solution::loadXml(const tinyxml2::XMLDocument* document)
+{
+	std::for_each(routes.begin(), routes.end(), [](const Route* route) { delete route; });
+	routes.clear();
+
+	const tinyxml2::XMLElement* solution = document->FirstChildElement("solution");
+	if (solution == nullptr)
+	{
+		std::cout << "No solution found!!!" << std::endl;
+	}
+
+	const tinyxml2::XMLElement* routeXml = solution->FirstChildElement("route");
+	while (routeXml != nullptr)
+	{
+		Route* route = new Route;
+		route->loadXml(routeXml);
+		routes.push_back(route);
+
+		routeXml = routeXml->NextSiblingElement();
+	}
+}
+
+tinyxml2::XMLElement*  Solution::saveXml(tinyxml2::XMLDocument* document) const
+{
+	tinyxml2::XMLElement* solution = document->NewElement("solution");
+
+	tinyxml2::XMLElement* stats = document->NewElement("stats");
+	stats->SetAttribute("drivers", get_num_drivers());
+	stats->SetAttribute("time", get_time_taken());
+	stats->SetAttribute("handled", get_num_requests_serviced());
+	solution->InsertEndChild(stats);
+
+	int size = routes.size();
+	for (int i = 0; i < size; i++)
+	{
+		routes.at(i)->saveXml(solution)->SetAttribute("num", i);
+	}
+
+	document->InsertEndChild(solution);
+	return solution;
+}
+
+void Solution::validate(const City& city)
+{
+	// Verify that each request is in the city
 }

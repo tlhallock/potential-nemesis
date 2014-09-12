@@ -10,7 +10,7 @@
 #include <sstream>
 #include <iomanip>
 
-Request::Request() : Request{Location {0, 0}, Store, 0, sh_time_max, none, none} {}
+Request::Request() : Request{Location{}, Store, 0, sh_time_max, none, none} {}
 
 Request::Request(Location l_,
 		Operation a_,
@@ -18,22 +18,12 @@ Request::Request(Location l_,
 		sh_time_t stop_time_,
 		DumpsterSize insize_,
 		DumpsterSize outsize_) :
-	Action{l_, a_, insize_, outsize_},
-	o(a_),
+	Location{l_},
+	OperationInfo{a_, insize_, outsize_},
 	start_time(start_time_),
 	stop_time(stop_time_) {}
 
 Request::~Request() {}
-
-sh_time_t Request::get_time_taken(sh_time_t start_time, const Location& from) const
-{
-	int64_t t1 = Action::get_time_taken(start_time, from);
-	if (this->start_time > t1)
-	{
-		t1 = this->start_time;
-	}
-	return t1 + time_at_stop();
-}
 
 sh_time_t Request::get_minimum_time() const
 {
@@ -45,38 +35,30 @@ sh_time_t Request::get_maximum_time() const
 	return stop_time;
 }
 
-int Request::get_points() const
-{
-	return 1;
-}
-
 std::ostream& operator<<(std::ostream& os, const Request& a)
 {
-	return os << Action {a} << "\tat time [" << std::setw(5) << a.start_time << ":" << std::setw(5) << a.stop_time << "]";
+	return os << OperationInfo {a} << "\tat time [" << std::setw(5) << a.start_time << ":" << std::setw(5) << a.stop_time << "]";
 }
 
-bool Request::satisfies(const action_ptr &r) const
+void Request::loadXml(const tinyxml2::XMLElement* element)
 {
-	return get_x() == r->get_x() && get_y() == r->get_y() && get_operation() == r->get_operation();
-}
-
-sh_time_t Request::time_at_stop() const
-{
-	return TIME_AT_HOUSE;
-}
-
-void Request::loadXml(const tinyxml2::XMLElement* landfill_list)
-{
-	Action::loadXml(landfill_list);
-	const tinyxml2::XMLElement* window = landfill_list->FirstChildElement("window");
+	Location::loadXml(element);
+	const tinyxml2::XMLElement* window = element->FirstChildElement("window");
 	window->QueryUnsignedAttribute("begin", &start_time);
 	window->QueryUnsignedAttribute("end", &stop_time);
 }
-void Request::child_save_xml(std::ostream& out) const
+
+tinyxml2::XMLElement* Request::saveXml(tinyxml2::XMLElement* parent) const
 {
-	out << "\t\t\t<window begin=\"" << start_time << "\" end=\"" << stop_time << "\" />" << std::endl;
+	tinyxml2::XMLElement* action = Location::saveXml(parent);
+	tinyxml2::XMLElement* window = parent->GetDocument()->NewElement("window");
+	window->SetAttribute("begin", start_time);
+	window->SetAttribute("end", stop_time);
+	action->InsertEndChild(window);
+	return action;
 }
-std::string Request::get_xml_name() const
+
+std::string get_size_text(const Request &r)
 {
-	return "request";
+	return get_size_text(r.get_input_dumpster_size()) + get_size_text(r.get_output_dumpster_size());
 }

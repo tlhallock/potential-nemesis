@@ -20,8 +20,8 @@ public:
 	virtual ~StagingArea();
 
 	friend std::ostream& operator<<(std::ostream& os, const StagingArea& r);
-	void loadXml(const tinyxml2::XMLElement* landfill_list);
-	void saveXml(std::ostream& out) const;
+	void loadXml(const tinyxml2::XMLElement* element);
+	tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
 private:
 	sh_time_t wait_time;
 	uint32_t max_containers;

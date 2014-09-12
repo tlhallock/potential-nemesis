@@ -10,6 +10,7 @@
 
 #include "model/Action.h"
 #include "model/Location.h"
+#include "model/OperationInfo.h"
 
 #include "common.h"
 
@@ -17,8 +18,7 @@
 #include <inttypes.h>
 #include <iostream>
 
-// TODO: A request is not an action...
-class Request : public Action
+class Request : virtual public Location, public XmlObject, public OperationInfo
 {
 public:
 	Request();
@@ -28,26 +28,15 @@ public:
 			sh_time_t stop_time,
 			DumpsterSize in,
 			DumpsterSize out);
-	virtual ~Request();
+	~Request();
 
-	virtual sh_time_t get_time_taken(sh_time_t start_time, const Location &from) const;
-
-	virtual sh_time_t get_minimum_time() const;
-	virtual sh_time_t get_maximum_time() const;
-
-	int get_points() const;
-
-	bool satisfies(const action_ptr &r) const;
+	sh_time_t get_minimum_time() const;
+	sh_time_t get_maximum_time() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Request& a);
-	void loadXml(const tinyxml2::XMLElement* landfill_list);
-protected:
-	virtual void child_save_xml(std::ostream& out) const;
-	virtual std::string get_xml_name() const;
-	virtual sh_time_t time_at_stop() const;
+	void loadXml(const tinyxml2::XMLElement* element);
+	tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
 private:
-	Operation o;
-
 	sh_time_t start_time;
 	sh_time_t stop_time;
 };

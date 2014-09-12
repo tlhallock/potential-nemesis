@@ -7,10 +7,13 @@
 
 #include "model/FillLand.h"
 
+
 FillLand::FillLand(const Landfill& l, DumpsterSize size_) :
 	Action {l, Dump, size_, size_},
 	landfill_cost(l.get_wait_time()),
 	size(size_) {}
+
+FillLand::FillLand() : FillLand {Landfill{}, none} {}
 
 FillLand::~FillLand() {}
 
@@ -38,7 +41,8 @@ void FillLand::child_save_xml(std::ostream& out) const
 {
 }
 
+
 std::string FillLand::get_xml_name() const
 {
-	return "Fill land";
+	return FILL_LAND_NAME ;
 }

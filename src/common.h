@@ -13,8 +13,6 @@
 
 #include <algorithm>
 
-#include <tinyxml2.h>
-
 typedef uint32_t sh_time_t;
 #define sh_time_max INT_MAX
 #define sh_time_min 0

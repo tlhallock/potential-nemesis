@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <sstream>
 
+Location::Location() : Location{0, 0} {};
 Location::Location(double x_, double y_) : x{x_}, y{y_} {}
 Location::Location(const Location& loc) :
 		Location{loc.get_x(), loc.get_y()} {}
@@ -18,9 +19,7 @@ Location::~Location() {}
 
 std::ostream& operator<<(std::ostream& os, const Location& r)
 {
-	os << "{" << std::setw(10) << r.x << " , " << std::setw(10) << r.y << " }";
-	r.append_to(os);
-	return os;
+	return os << "{" << std::setw(10) << r.x << " , " << std::setw(10) << r.y << " }";
 }
 
 sh_time_t Location::get_time_to(const Location& l) const
@@ -30,8 +29,6 @@ sh_time_t Location::get_time_to(const Location& l) const
 
 	return (int64_t) sqrt(xd * xd + yd * yd);
 }
-
-void Location::append_to(std::ostream& os) const {}
 
 bool Location::is_same_location(const Location& other) const
 {
@@ -65,16 +62,18 @@ bool Location::operator ==(const Location& other) const
 	return x == other.x && y == other.y;
 }
 
+#if 0
 std::string Location::serialize() const
 {
 	std::stringstream ss;
 	ss << "[" << x << "," << y << "]";
 	return ss.str();
 }
+#endif
 
-void Location::loadXml(const tinyxml2::XMLElement* landfill)
+void Location::loadXml(const tinyxml2::XMLElement* element)
 {
-	const tinyxml2::XMLElement* loc = landfill->FirstChildElement("location");
+	const tinyxml2::XMLElement* loc = element->FirstChildElement("location");
 	if (loc == nullptr)
 	{
 		std::cout << "Error parsing location: no location!" << std::endl;
@@ -85,8 +84,11 @@ void Location::loadXml(const tinyxml2::XMLElement* landfill)
 		loc->QueryDoubleAttribute("y", &y);
 	}
 }
-
-void Location::saveXml(std::ostream& out) const
+tinyxml2::XMLElement* Location::saveXml(tinyxml2::XMLElement* element) const
 {
-	out << "\t\t\t<location x=\"" << x << "\" y=\"" << y << "\"/>" << std::endl;
+	tinyxml2::XMLElement* location = element->GetDocument()->NewElement("location");
+	location->SetAttribute("x", x);
+	location->SetAttribute("y", y);
+	element->InsertEndChild(location);
+	return location;
 }

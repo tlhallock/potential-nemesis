@@ -97,7 +97,7 @@ bool is_possible(const action_ptr prev_action, const action_ptr action, const sh
 	return		start_time < sh_time_look_ahead
 			&& operation_follows(prev_action->get_operation(), action->get_operation())
 			&& action->follows_in_time(start_time, *prev_action.get())
-			&& !s->already_serviced(action)
+			&& !s->already_serviced(action->get_serviced_request())
 			&& sizes_match(prev_action, action);
 }
 

@@ -26,6 +26,16 @@ void test_solver(Solver &&solver, const City &requests, bool best_of_many = true
 	svg_print_solution(name, sol, p);
 	std::ofstream log {"sol." + name + ".txt" };
 	log << sol << std::endl;
+
+
+	{
+		sol.XmlRootObject::saveXml(stdout);
+		sol.XmlRootObject::saveXml("test_sol.xml");
+
+		Solution another {p.get_num_drivers()};
+		another.XmlRootObject::loadXml("test_sol.xml");
+		another.XmlRootObject::saveXml(stdout);
+	}
 }
 
 int main(int argc, char **argv)
@@ -58,6 +68,10 @@ int main(int argc, char **argv)
 		10. I should clean up the code, and maybe add comments.
 			saveXml(bad parameter name)
 			Action.get_points() is a bad name
+		11. Should the spoke solution also spoke staging?
+				maybe I should ensure staging areas are close to landfills
+		12. Right now, in optimization utils, I do not consider paths that have have length more than two from a request (store->unstore->request)
+		13. Add constraints to each request on which driver they can be attended by.
 #endif
 
 	srand(time(NULL));
@@ -65,7 +79,7 @@ int main(int argc, char **argv)
 	Parameters p;
 
 	City city = generate_city(p);
-	city.saveXml("city.xml");
+	city.XmlRootObject::saveXml("city.xml");
 
 	svg_print_city("random", city, p);
 
@@ -78,15 +92,16 @@ int main(int argc, char **argv)
 	int num_to_try = 100;
 
 	test_solver(BestOfManySolver { new RandomGeneratorSolver {p}, num_to_try }, city);
-	test_solver(BestOfManySolver { new NearestPointSolver {p},    num_to_try }, city);
-	test_solver(BestOfManySolver { new SpokeSolver {p},           num_to_try }, city);
+
+//	test_solver(BestOfManySolver { new NearestPointSolver {p},    num_to_try }, city);
+//	test_solver(BestOfManySolver { new SpokeSolver {p},           num_to_try }, city);
 
 	// Right now, these should be about equivalent because the genetic solver doesn't have any breeding/mutation
-	test_solver(GeneticSolver {p, num_to_try, new RandomGeneratorSolver {p}, 50, new SubcycleBreeder{}}, city, false);
-	test_solver(GeneticSolver {p, num_to_try, new NearestPointSolver {p}},    city, false);
-	test_solver(GeneticSolver {p, num_to_try, new SpokeSolver {p}},           city, false);
+//	test_solver(GeneticSolver {p, num_to_try, new RandomGeneratorSolver {p}, 50, new SubcycleBreeder{}}, city, false);
+//	test_solver(GeneticSolver {p, num_to_try, new NearestPointSolver {p}},    city, false);
+//	test_solver(GeneticSolver {p, num_to_try, new SpokeSolver {p}},           city, false);
 
-	std::cout << "total=" << city.get_num_requests() << std::endl;
+//	std::cout << "total=" << city.get_num_requests() << std::endl;
 
 	return 0;
 }

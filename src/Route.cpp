@@ -9,6 +9,8 @@
 
 #include "model/Landfills.h"
 #include "model/Rules.h"
+#include "model/FillLand.h"
+#include "model/Request.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -68,6 +70,34 @@ const action_ptr &Route::get_last_action() const
 	return requests.back();
 }
 
+void Route::loadXml(const tinyxml2::XMLElement* element)
+{
+	const tinyxml2::XMLElement* stop = element->FirstChildElement("action");
+	while (stop != nullptr)
+	{
+		Action* action = new Action;
+		action->loadXml(stop);
+		requests.push_back(action_ptr { action });
+
+		stop = stop->NextSiblingElement("action");
+	}
+}
+
+tinyxml2::XMLElement* Route::saveXml(tinyxml2::XMLElement* parent) const
+{
+	int size = requests.size();
+
+	tinyxml2::XMLElement* route = parent->GetDocument()->NewElement("route");
+
+	for (int i = 0; i < size; i++)
+	{
+		requests.at(i)->saveXml(route)->SetAttribute("order", i);
+	}
+
+	parent->InsertEndChild(route);
+	return route;
+}
+
 sh_time_t Route::get_time_taken(const int max) const
 {
 	if (max <= 1)
@@ -110,7 +140,7 @@ std::ostream& operator<<(std::ostream& os, const Route& r)
 	return os;
 }
 
-bool Route::already_serviced(const action_ptr& r) const
+bool Route::already_serviced(const Request *r) const
 {
 	return std::any_of(requests.begin(), requests.end(), [&r](const action_ptr &a){ return a->satisfies(r); });
 }
