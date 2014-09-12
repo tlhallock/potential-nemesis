@@ -10,6 +10,8 @@
 #include <sstream>
 #include <iomanip>
 
+Request::Request() : Request{Location {0, 0}, Store, 0, sh_time_max, none, none} {}
+
 Request::Request(Location l_,
 		Operation a_,
 		sh_time_t start_time_,
@@ -48,10 +50,9 @@ int Request::get_points() const
 	return 1;
 }
 
-void Request::append_to(std::ostream& os) const
+std::ostream& operator<<(std::ostream& os, const Request& a)
 {
-	Action::append_to(os);
-	os << "\tat time [" << std::setw(5) << start_time << ":" << std::setw(5) << stop_time << "]";
+	return os << Action {a} << "\tat time [" << std::setw(5) << a.start_time << ":" << std::setw(5) << a.stop_time << "]";
 }
 
 bool Request::satisfies(const action_ptr &r) const
@@ -62,4 +63,20 @@ bool Request::satisfies(const action_ptr &r) const
 sh_time_t Request::time_at_stop() const
 {
 	return TIME_AT_HOUSE;
+}
+
+void Request::loadXml(const tinyxml2::XMLElement* landfill_list)
+{
+	Action::loadXml(landfill_list);
+	const tinyxml2::XMLElement* window = landfill_list->FirstChildElement("window");
+	window->QueryUnsignedAttribute("begin", &start_time);
+	window->QueryUnsignedAttribute("end", &stop_time);
+}
+void Request::child_save_xml(std::ostream& out) const
+{
+	out << "\t\t\t<window begin=\"" << start_time << "\" end=\"" << stop_time << "\" />" << std::endl;
+}
+std::string Request::get_xml_name() const
+{
+	return "request";
 }

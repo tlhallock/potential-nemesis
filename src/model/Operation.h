@@ -32,4 +32,9 @@ typedef enum
 std::string operation_to_string(Operation o);
 std::string operation_to_svg(Operation o);
 
+Operation char_to_operation(char c);
+
+std::string size_to_string(DumpsterSize);
+DumpsterSize string_to_size(const char *str);
+
 #endif /* OPERATION_H_ */

@@ -37,6 +37,10 @@ public:
 	const std::vector<action_ptr> &get_all_actions() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const City& r);
+
+	void loadXml(const std::string &filename);
+	void saveXml(const std::string& filename) const;
+	void saveXml(std::ostream& out) const;
 private:
 
 	void refresh_all_actions();

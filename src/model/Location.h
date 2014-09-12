@@ -27,6 +27,9 @@ public:
 	double get_y() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Location& r);
+	virtual void loadXml(const tinyxml2::XMLElement* landfill);
+	virtual void saveXml(std::ostream& out) const;
+
 	bool operator==(const Location &other) const;
 	bool operator<(const Location &other) const;
 	std::string serialize() const;

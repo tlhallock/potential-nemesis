@@ -11,6 +11,8 @@
 
 #include "float.h"
 
+#include <fstream>
+
 City::City() {}
 City::~City() {}
 
@@ -59,6 +61,101 @@ const std::vector<action_ptr>& City::get_all_actions() const
 	return all_actions;
 }
 
+void City::loadXml(const std::string& filename)
+{
+	tinyxml2::XMLDocument doc;
+	doc.LoadFile(filename.c_str());
+	tinyxml2::XMLElement* element = doc.FirstChildElement("city");
+	if (element == nullptr)
+	{
+		std::cout << "No city found in " << filename << "!" << std::endl;
+		exit(-1);
+	}
+
+	tinyxml2::XMLElement* list = element->FirstChildElement();
+	while (list != nullptr)
+	{
+		const char* name = list->Name();
+		if (strcmp(name, "landfills") == 0)
+		{
+			tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
+			while (landfill_list != nullptr)
+			{
+				Landfill l;
+				l.loadXml(landfill_list);
+				landfill_list = landfill_list->NextSiblingElement();
+				land_fills.push_back(l);
+			}
+		}
+		else if (strcmp(name, "stagingareas") == 0)
+		{
+			tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
+			while (landfill_list != nullptr)
+			{
+				StagingArea l;
+				l.loadXml(landfill_list);
+				landfill_list = landfill_list->NextSiblingElement();
+				staging_areas.push_back(l);
+			}
+		}
+		else if (strcmp(name, "requests") == 0)
+		{
+			tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
+			while (landfill_list != nullptr)
+			{
+				Request l;
+				l.loadXml(landfill_list);
+				landfill_list = landfill_list->NextSiblingElement();
+				requests.push_back(l);
+			}
+		}
+		else
+		{
+			std::cout << "Unknown element name: " << name <<"." << std::endl;
+			std::cout << "Goodbye cruel world!" << std::endl;
+			exit(-1);
+		}
+
+		list = list->NextSiblingElement();
+	}
+}
+
+void City::saveXml(std::ostream& os) const
+{
+	os << "<?xml version=\"1.0\"?>" << std::endl;
+	os << "<city>" << std::endl;
+
+	os << "\t<requests len=\"" << requests.size() << "\">" << std::endl;
+	std::for_each(requests.begin(), requests.end(), [&os](const Request &r)
+	{
+		r.saveXml(os);
+	});
+	os << "\t</requests>" << std::endl;
+
+	os << "\t<landfills len=\"" << land_fills.size() << "\">" << std::endl;
+	std::for_each(land_fills.begin(), land_fills.end(), [&os](const Landfill &r)
+	{
+		r.saveXml(os);
+	});
+	os << "\t</landfills>" << std::endl;
+
+
+	os << "\t<stagingareas len=\"" << staging_areas.size() << "\">" << std::endl;
+	std::for_each(staging_areas.begin(), staging_areas.end(), [&os](const StagingArea &r)
+	{
+		r.saveXml(os);
+	});
+	os << "\t</stagingareas>" << std::endl;
+
+	os << "</city>" << std::endl;
+}
+
+void City::saveXml(const std::string& filename) const
+{
+	std::ofstream out {filename};
+	saveXml(out);
+}
+
 void City::refresh_all_actions()
 {
 	all_actions.clear();
@@ -105,12 +202,14 @@ const StagingArea& City::get_staging_area(int idx) const
 std::ostream& operator<<(std::ostream& os, const City& c)
 {
 	os << "Requests:" << std::endl;
+	os << c.requests.size();
 	std::for_each(c.requests.begin(), c.requests.end(), [&os](const Request &r)
 	{
 		os << r << std::endl;
 	});
 
 	os << "Landfills:" << std::endl;
+	os << c.land_fills.size();
 	std::for_each(c.land_fills.begin(), c.land_fills.end(), [&os](const Landfill &r)
 	{
 		os << r << std::endl;
@@ -118,6 +217,7 @@ std::ostream& operator<<(std::ostream& os, const City& c)
 
 
 	os << "Staging areas:" << std::endl;
+	os << c.staging_areas.size();
 	std::for_each(c.staging_areas.begin(), c.staging_areas.end(), [&os](const StagingArea &r)
 	{
 		os << r << std::endl;
@@ -125,6 +225,44 @@ std::ostream& operator<<(std::ostream& os, const City& c)
 
 	return os;
 }
+
+#if 0
+std::ostream& operator>>(std::ostream& os, City& c)
+{
+	std::string line;
+	std::getline(os, line); // Requests:
+
+	int num;
+	os >> num;
+	for (int i=0; i<num; i++)
+	{
+		Request r;
+		os >> r;
+		c.requests.push_back(r);
+	}
+
+	std::getline(os, line); // Landfills:
+	os >> num;
+	for (int i=0; i<num; i++)
+	{
+		Landfill r;
+		os >> r;
+		c.land_fills.push_back(r);
+	}
+
+
+	std::getline(os, line); // Staging Areas:
+	os >> num;
+	for (int i=0; i<num; i++)
+	{
+		StagingArea r;
+		os >> r;
+		c.staging_areas.push_back(r);
+	}
+
+	return os;
+}
+#endif
 
 
 void City::set_requests(std::vector<Request> requests_)

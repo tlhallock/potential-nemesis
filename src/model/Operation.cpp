@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include <string.h>
+
 std::string operation_to_string(Operation a)
 {
 	switch (a)
@@ -27,6 +29,7 @@ std::string operation_to_string(Operation a)
 			return "Replace full dumpster with empty one ";
 		default:
 			std::cout << "Uh Oh!!!! 45234523542435" << std::endl;
+			exit(-1);
 			return "Uknown";
 	}
 }
@@ -49,6 +52,84 @@ std::string operation_to_svg(Operation o)
 			return "R";
 		default:
 			std::cout << "Uh Oh!!!! a62562362346fgagasdg" << std::endl;
+			exit(-1);
 			return "?";
+	}
+}
+
+Operation char_to_operation(char c)
+{
+	switch (c)
+	{
+		case 'P':
+			return PickUp;
+		case 'D':
+			return DropOff;
+		case 'T':
+			return Dump;
+		case 'S':
+			return Store;
+		case 'U':
+			return UnStore;
+		case 'R':
+			return Replace;
+		default:
+			std::cout << "Uh Oh!!!! agdasdgadsg" << std::endl;
+			exit(-1);
+			return Store;
+	}
+}
+
+std::string size_to_string(DumpsterSize size)
+{
+	switch(size)
+	{
+		case smallest:
+			return "smallest";
+		case small:
+			return "small";
+		case big:
+			return "big";
+		case biggest:
+			return "biggest";
+		case none:
+			return "none";
+		default:
+			std::cout << "Unknown dumpster size!" << std::cout;
+			exit(-1);
+	}
+}
+
+DumpsterSize string_to_size(const char* str)
+{
+	if (str == nullptr)
+	{
+		std::cout << "Null in dumpster size!!!!" << std::endl;
+		exit(-1);
+	}
+	else if (strcmp(str, "smallest"))
+	{
+		return smallest;
+	}
+	else if (strcmp(str, "small"))
+	{
+		return small;
+	}
+	else if (strcmp(str, "big"))
+	{
+		return big;
+	}
+	else if (strcmp(str, "biggest"))
+	{
+		return biggest;
+	}
+	else if (strcmp(str, "none"))
+	{
+		return none;
+	}
+	else
+	{
+		std::cout << "Unknown dumpster size string: " << str << std::endl;
+		exit(-1);
 	}
 }

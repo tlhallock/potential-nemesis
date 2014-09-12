@@ -40,9 +40,14 @@ public:
 	virtual DumpsterSize get_output_dumpster_size() const;
 	virtual DumpsterSize get_input_dumpster_size() const;
 
-protected:
-	virtual void append_to(std::ostream& os) const;
+	friend std::ostream& operator<<(std::ostream& os, const Action& a);
+	void loadXml(const tinyxml2::XMLElement* landfill_list);
+	void saveXml(std::ostream& out) const;
 
+protected:
+	// TODO: organize this extra method.
+	virtual void child_save_xml(std::ostream& out) const;
+	virtual std::string get_xml_name() const;
 private:
 	Operation o;
 

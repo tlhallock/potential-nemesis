@@ -71,3 +71,22 @@ std::string Location::serialize() const
 	ss << "[" << x << "," << y << "]";
 	return ss.str();
 }
+
+void Location::loadXml(const tinyxml2::XMLElement* landfill)
+{
+	const tinyxml2::XMLElement* loc = landfill->FirstChildElement("location");
+	if (loc == nullptr)
+	{
+		std::cout << "Error parsing location: no location!" << std::endl;
+	}
+	else
+	{
+		loc->QueryDoubleAttribute("x", &x);
+		loc->QueryDoubleAttribute("y", &y);
+	}
+}
+
+void Location::saveXml(std::ostream& out) const
+{
+	out << "\t\t\t<location x=\"" << x << "\" y=\"" << y << "\"/>" << std::endl;
+}

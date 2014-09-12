@@ -13,13 +13,18 @@
 class StagingArea : public Location
 {
 public:
+	StagingArea();
 	StagingArea(const Location &loc,
 			sh_time_t wait_time,
 			int max_containers);
 	virtual ~StagingArea();
+
+	friend std::ostream& operator<<(std::ostream& os, const StagingArea& r);
+	void loadXml(const tinyxml2::XMLElement* landfill_list);
+	void saveXml(std::ostream& out) const;
 private:
 	sh_time_t wait_time;
-	int max_containers;
+	uint32_t max_containers;
 };
 
 #endif /* STAGINGAREA_H_ */

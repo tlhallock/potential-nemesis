@@ -15,10 +15,15 @@
 class Landfill : public Location
 {
 public:
+	Landfill();
 	Landfill(const Location &loc, sh_time_t wait_time);
 	~Landfill();
 
 	sh_time_t get_wait_time() const;
+
+	friend std::ostream& operator<<(std::ostream& os, const Landfill& r);
+	void loadXml(const tinyxml2::XMLElement* landfill_list);
+	void saveXml(std::ostream& out) const;
 private:
 	sh_time_t wait_time;
 };

@@ -45,9 +45,9 @@ int Action::get_points() const { return 0; }
 
 Operation Action::get_operation() const { return o; }
 
-void Action::append_to(std::ostream& os) const
+std::ostream& operator<<(std::ostream& os, const Action& a)
 {
-	os << " a='" << std::left << std::setw(10) << operation_to_string(o) << "' " << get_size_text(*this);
+	return os << Location {a} << " a='" << std::left << std::setw(10) << operation_to_string(a.o) << "' " << get_size_text(a);
 }
 
 bool Action::satisfies(const action_ptr& r) const
@@ -104,7 +104,36 @@ bool satisfies_operation_constraint(const action_ptr &action, const operation_lo
 			&& action->get_y() == loc.get_y();
 }
 
+void Action::loadXml(const tinyxml2::XMLElement* area)
+{
+	const char *op = area->Attribute("operation");
+	if (op == nullptr)
+	{
+		std::cout << "No operation for action!!!!" << std::endl;
+		exit(-1);
+	}
+	o = char_to_operation(*op);
 
+	insize = string_to_size(area->Attribute("in"));
+	outsize = string_to_size(area->Attribute("out"));
+	Location::loadXml(area);
+}
 
+void Action::saveXml(std::ostream& out) const
+{
+	out << "\t\t<" << get_xml_name();
+	out << " operation=\"" << operation_to_svg(o) << "\"";
+	out << " in=\"" << size_to_string(insize) << "\"";
+	out << " out=\"" << size_to_string(outsize) << "\">" << std::endl;
+	Location::saveXml(out);
+	// should have been better about this: this should save to an xml document too...
+	child_save_xml(out);
+	out << "\t\t</" << get_xml_name() << ">" << std::endl;
+}
 
+void Action::child_save_xml(std::ostream& out) const {}
 
+std::string Action::get_xml_name() const
+{
+	return "action";
+}

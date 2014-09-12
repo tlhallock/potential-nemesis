@@ -28,3 +28,17 @@ DumpsterSize FillLand::get_input_dumpster_size() const
 {
 	return size;
 }
+
+void FillLand::loadXml(const tinyxml2::XMLElement* landfill_list)
+{
+	Action::loadXml(landfill_list);
+}
+
+void FillLand::child_save_xml(std::ostream& out) const
+{
+}
+
+std::string FillLand::get_xml_name() const
+{
+	return "Fill land";
+}

@@ -32,3 +32,4 @@ python/examples
 eclipse/SamsHauling/*.sol.svg
 eclipse/SamsHauling/sol.*.txt
 eclipse/SamsHauling/random.req.svg
+eclipse/SamsHauling/.settings/

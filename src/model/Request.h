@@ -21,6 +21,7 @@
 class Request : public Action
 {
 public:
+	Request();
 	Request(        Location l,
 			Operation a,
 			sh_time_t start_time,
@@ -38,8 +39,11 @@ public:
 
 	bool satisfies(const action_ptr &r) const;
 
+	friend std::ostream& operator<<(std::ostream& os, const Request& a);
+	void loadXml(const tinyxml2::XMLElement* landfill_list);
 protected:
-	virtual void append_to(std::ostream& os) const;
+	virtual void child_save_xml(std::ostream& out) const;
+	virtual std::string get_xml_name() const;
 	virtual sh_time_t time_at_stop() const;
 private:
 	Operation o;

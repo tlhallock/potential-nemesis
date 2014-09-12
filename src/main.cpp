@@ -33,11 +33,12 @@ int main(int argc, char **argv)
 	// to do: add time to the action when the staging area has a time/cost...
 	// make a separate action for the an action satisfying a request (request =/= action)
 
-//	srand(time(NULL));
-	srand(5000013);
+	srand(time(NULL));
+	//srand(5000013);
 	Parameters p;
 
 	City city = generate_city(p);
+	city.saveXml("city.xml");
 
 	svg_print_city("random", city, p);
 
