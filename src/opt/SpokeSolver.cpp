@@ -9,8 +9,9 @@
 
 #include "model/Rules.h"
 
-#include "model/Landfills.h"
 #include "OptimizerUtils.h"
+
+#include <set>
 
 SpokeSolver::SpokeSolver(const Parameters &p) :
 	NearestPointSolver {p} {}
@@ -26,14 +27,34 @@ const operation_location_constraint& SpokeSolver::get_constraints(const City &ci
 {
 	if (constraints.size() == 0)
 	{
+		std::set<location> land_fills;
+		int num_actions = city.get_num_stops();
+		for (int i = 0; i < num_actions; i++)
+		{
+			if (city.get_stop(i)->get_operation() != Dump)
+			{
+				continue;
+
+			}
+			land_fills.insert(city.get_stop(i)->get_location());
+		}
+
+		auto it = land_fills.begin();
+
+
 		// Assign each driver a landfill to spoke around...
-		int index = 0;
 		for (int i = 0; i < p.get_num_drivers(); i++)
 		{
-			std::map<const Operation, const Location> c;
-			c.insert(std::pair<const Operation, const Location> {Dump, city.get_land_fill(index)});
+			if (it == land_fills.end())
+			{
+				it = land_fills.begin();
+			}
+			location l = *it;
+			std::map<const Operation, const location> c;
+			c.insert(std::pair<const Operation, const location> {Dump, l});
 			constraints.push_back(c);
-			index = (index + 1) % city.get_num_land_fills();
+
+			it++;
 		}
 	}
 	return constraints.at(driver);

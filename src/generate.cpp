@@ -19,7 +19,7 @@ Location generate_location(const Parameters &p)
 	return Location{generate_coord(p), generate_coord(p)};
 }
 
-Operation generate_operation()
+Operation generate_request_operation()
 {
 
 	double choice = rand() / (double) RAND_MAX;
@@ -115,65 +115,138 @@ void generate_times(Operation o, sh_time_t &start_time, sh_time_t &stop_time)
 	stop_time = sh_time_look_ahead;
 }
 
-Request generate_request(const Parameters &p)
+void generate_requests(const Parameters &p, City *city)
 {
-	Operation o = generate_operation();
+	for (int i = 0; i < p.num_random_requests(); i++)
+	{
+		Operation o = generate_request_operation();
 
-	sh_time_t start_time;
-	sh_time_t stop_time;
+		sh_time_t start_time;
+		sh_time_t stop_time;
 
-	generate_times(o, start_time, stop_time);
+		generate_times(o, start_time, stop_time);
 
-	return Request {
-		generate_location(p),
-		OperationInfo
+		location l = city->add_location(generate_location(p));
+
+		// only good for now...
+		uint32_t inventory[4];
+		inventory[0] = inventory[1] = inventory[2] = inventory[3] = 0;
+
+		city->add_stop(new Action
 		{
 			o,
 			gen_in_size(o),
-			gen_out_size(o)
-		},
-		start_time,
-		stop_time};
-}
-
-std::vector<Request> generate_requests(const Parameters &p)
-{
-	std::vector<Request> requests;
-	for (int i = 0; i < p.num_random_requests(); i++)
-	{
-		requests.push_back(generate_request(p));
+			gen_out_size(o),
+			start_time,
+			stop_time,
+			TIME_AT_HOUSE,
+			1,
+			&inventory[0],
+			l
+		});
 	}
-
-	return requests;
 }
 
-std::vector<Landfill> generate_landfills(const Parameters &p)
+void generate_landfills(const Parameters &p, City* city)
 {
-	std::vector<Landfill> ret;
+	DumpsterSize sizes[] = {smallest, small, big, biggest};
+	// only good for now...
+	uint32_t inventory[4];
+	inventory[0] = inventory[1] = inventory[2] = inventory[3] = 0;
+
 	for (int i = 0; i < p.num_random_land_fills(); i++)
 	{
-		ret.push_back(Landfill{generate_location(p), LANDFILL_TIME});
+		location l = city->add_location(generate_location(p));
+		for (int j = 0; j < 4; j++)
+		{
+			city->add_stop(new Action
+			{
+				Dump,
+				sizes[j],
+				sizes[j],
+				0,
+				sh_time_look_ahead,
+				LANDFILL_TIME,
+				0,
+				&inventory[0],
+				l
+			});
+		}
 	}
-	return ret;
 }
 
-std::vector<StagingArea> generate_staging_areas(const Parameters &p)
+void generate_staging_areas(const Parameters &p, City* city)
 {
-	std::vector<StagingArea> ret;
+	DumpsterSize sizes[] = {smallest, small, big, biggest};
+	// only good for now...
+	uint32_t inventory[4];
+	inventory[0] = inventory[1] = inventory[2] = inventory[3] = 0;
+
 	for (int i = 0; i < p.num_random_staging_areas(); i++)
 	{
-		ret.push_back(StagingArea{generate_location(p), 0, INT_MAX});
+		location l = city->add_location(generate_location(p));
+		for (int j = 0; j < 4; j++)
+		{
+			city->add_stop(new Action
+			{
+				Store,
+				sizes[j],
+				none,
+				0,
+				sh_time_look_ahead,
+				STAGE_TIME,
+				0,
+				&inventory[0],
+				l
+			});
+			city->add_stop(new Action
+			{
+				UnStore,
+				none,
+				sizes[j],
+				0,
+				sh_time_look_ahead,
+				STAGE_TIME,
+				0,
+				&inventory[0],
+				l
+			});
+		}
 	}
-	return ret;
 }
 
-City generate_city(const Parameters &p)
+TruckType generate_truck_type()
 {
-	City c;
+	switch (rand() % 3)
+	{
+		case 0:
+			return lithe;
+		case 1:
+			return normal;
+		case 2:
+			return strong;
+	}
+	return normal;
+}
 
-	c.set_requests(generate_requests(p));
-	c.set_land_fills(generate_landfills(p));
-	c.set_staging_areas(generate_staging_areas(p));
+void generate_trucks(const Parameters &p, City* city)
+{
+	for (int i = 0; i < p.get_num_drivers(); i++)
+	{
+		city->add_truck(generate_truck_type());
+	}
+}
+
+City *generate_city(const Parameters &p)
+{
+	City *c = new City;
+
+	c->add_location(generate_location(p)); // start location...
+
+	generate_trucks(p, c);
+	generate_requests(p, c);
+	generate_landfills(p, c);
+	generate_staging_areas(p, c);
 
 	return c;
 }

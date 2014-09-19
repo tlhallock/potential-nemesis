@@ -23,8 +23,7 @@
 
 #include "XmlObject.h"
 
-typedef int action_ptr;
-typedef int location;
+typedef uint32_t location;
 
 class Action
 {
@@ -38,8 +37,8 @@ public:
 			sh_time_t max,
 			sh_time_t time,
 			uint32_t max_dumpsters_,
-			uint32_t initial_inventory_[],
-			int location_);
+			uint32_t *initial_inventory_,
+			location location_);
 	~Action();
 
 	DumpsterSize get_output_dumpster_size() const;
@@ -54,10 +53,10 @@ public:
 	// rename this...
 	int get_points() const;
 
-	int get_index();
+	int get_index() const;
 	void set_index(int ndx);
 
-	location get_location();
+	location get_location() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Action& a);
 
@@ -81,10 +80,5 @@ private:
 
 	int index;
 };
-
-const Action* get_start_action();
-
-typedef std::map<const Operation, const Location> operation_location_constraint;
-bool satisfies_operation_constraint(action_ptr action, const operation_location_constraint& constraint);
 
 #endif /* ACTION_H_ */

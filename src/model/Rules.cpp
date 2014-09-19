@@ -6,6 +6,7 @@
  */
 
 #include "model/Rules.h"
+#include "model/City.h"
 
 #include <iostream>
 
@@ -63,7 +64,7 @@ bool old_operation_follows(Operation prev_operation, Operation next_operation)
 
 }
 
-inline bool sizes_match(const action_ptr &a1, const action_ptr &a2)
+inline bool sizes_match(const Action* a1, const Action* a2)
 {
 	return a1->get_output_dumpster_size() == a2->get_input_dumpster_size();
 }
@@ -91,34 +92,40 @@ inline bool operation_follows(Operation prev_operation, Operation next_operation
 	}
 }
 
-bool is_possible(const Action* prev_action, const action_ptr action, const sh_time_t start_time, const Solution * const s)
+bool is_possible(const City* city,
+		const Solution * s,
+		const sh_time_t start_time,
+		const Action* prev_action,
+		const Action* action)
 {
 	return          start_time < sh_time_look_ahead
 			&& operation_follows(prev_action->get_operation(), action->get_operation())
-			&& action->follows_in_time(start_time, *prev_action.get())
-			&& !s->already_serviced(action->get_serviced_request())
+			&& follows_in_time(city, start_time, prev_action->get_location(), action)
+			&& !s->already_serviced(action)
 			&& sizes_match(prev_action, action);
 }
 
-std::vector<route_stop>* get_possibles(
+std::vector<const Action*>* get_possibles(
 		const Solution *s,
 		sh_time_t start_time,
-		route_stop prev_action,
-		const std::vector<route_stop>& all_possibles)
+		const Action* prev_action,
+		const City &city)
 {
-	std::vector<action_ptr> *actions = new std::vector<action_ptr>;
+	std::vector<const Action*> *actions = new std::vector<const Action*>;
+
+	const std::vector<const Action*> &all_possibles = city.get_all_stops();
 
 	auto end = all_possibles.end();
 	for (auto it = all_possibles.begin(); it != end; ++it)
 	{
-		const action_ptr &action = *it;
+		const Action* possible = *it;
 
 //		std::cout << "Prev " << *prev_action.get() << std::endl;
 //		std::cout << "Consider " << *action.get() << std::endl;
 
-		if (is_possible(prev_action, action, start_time, s))
+		if (is_possible(&city, s, start_time, prev_action, possible))
 		{
-			actions->push_back(action);
+			actions->push_back(possible);
 		}
 	}
 	return actions;
@@ -126,28 +133,26 @@ std::vector<route_stop>* get_possibles(
 
 
 
-sh_time_t get_time_taken(const City *city, sh_time_t start_time, action_ptr from, action_ptr to) const
+sh_time_t get_time_taken(const City *city, sh_time_t start_time, location from, const Action* to)
 {
-	const Action* stop = city->get_stop(to);
-
 	sh_time_t end_time = start_time;
-	end_time += city->get_time_from(city->get_stop(from)->get_location(), stop->get_location());
-	if (end_time < city->stop->get_minimum_time())
+	end_time += city->get_time_from(from, to->get_location());
+	if (end_time < to->get_minimum_time())
 	{
-		end_time = stop->get_minimum_time();
+		end_time = to->get_minimum_time();
 	}
-	end_time += stop->get_wait_time();
+	end_time += to->get_wait_time();
 
 	return end_time;
-	return start_time + from.get_time_to(*this);
 }
 
-bool follows_in_time(const City *city, sh_time_t start_time, action_ptr from, action_ptr to) const
+bool follows_in_time(const City *city, sh_time_t start_time, location from, const Action* to)
 {
 	sh_time_t time = get_time_taken(city, start_time, from, to);
-	return time < city->get_stop(to)->get_maximum_time() &&
-
-			time > city->get_stop(to)->get_minimum_time()
-			;
+	return
+#if 0
+			time > to->get_minimum_time() &&
+#endif
+			time < to->get_maximum_time();
 }
 

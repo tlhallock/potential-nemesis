@@ -7,49 +7,43 @@
 
 #include "Route.h"
 
-#include "model/Landfills.h"
 #include "model/Rules.h"
-#include "model/FillLand.h"
-#include "model/Request.h"
-
-#include "model/Service.h"
+#include "model/City.h"
 
 #include <algorithm>
 #include <iomanip>
 
-Route::Route()
+Route::Route(const City *city_, int driver_) :
+	city{city_},
+	driver{driver_}
 {
-	requests.push_back(action_ptr {get_start_action()} );
+	requests.push_back(city->get_start_action(driver));
 }
 
-Route::Route(const Route &other)
+Route::Route(const Route &other) :
+	city{other.city},
+	driver{other.driver}
 {
 	requests.insert(requests.begin(), other.requests.begin(), other.requests.end());
 }
 
 Route::~Route() {}
 
-bool Route::can_service_next(action_ptr req) const
+bool Route::can_service_next(const Action* req) const
 {
-	return operation_follows(requests.back()->get_operation(), req->get_operation())
-			&& req->follows_in_time(get_time_taken(), *requests.back().get());
+	const Action* last_action = get_last_action();
+	return operation_follows(last_action->get_operation(), req->get_operation())
+			&& follows_in_time(city, get_time_to_end(), last_action->get_location(), req);
 }
 
-bool Route::service_next(action_ptr req)
+void Route::service_next(const Action* req)
 {
-	if (!can_service_next(req))
-	{
-		std::cout << "Impossible state: " << *req << " from\n" << *this << std::endl;
-		return false;
-	}
-
-	requests.push_back(req);
-	return true;
+	requests.push_back(req->get_index());
 }
 
-sh_time_t Route::get_time_taken() const
+sh_time_t Route::get_time_to_end() const
 {
-	return get_time_taken(requests.size());
+	return get_time_to(requests.size());
 }
 
 int Route::get_num_actions() const
@@ -57,48 +51,35 @@ int Route::get_num_actions() const
 	return requests.size();
 }
 
-const Action& Route::get_action(int index) const
+const Action* Route::get_action(int index) const
 {
-	return *requests.at(index);
+	if (index > requests.size())
+	{
+		std::cout << "trying to get a action that is not in this route!" << std::endl;
+		exit(-1);
+	}
+
+	return city->get_stop(requests.at(index));
 }
 
-const Location& Route::get_current_location() const
+const Action* Route::get_last_action() const
 {
-	return *requests.back();
-}
-
-const action_ptr &Route::get_last_action() const
-{
-	return requests.back();
+	int back =  requests.back();
+	return city->get_stop(back);
 }
 
 void Route::loadXml(const tinyxml2::XMLElement* element)
 {
 	requests.clear();
 
-	const tinyxml2::XMLElement* stop = element->FirstChildElement();
+	const tinyxml2::XMLElement* stop = element->FirstChildElement("stop");
 	while (stop != nullptr)
 	{
-		Action* action = nullptr;
-		const char *name = stop->Name();
-		if (strcmp(name, "action") == 0)
-		{
-			action = new Action;
-		}
-		else if (strcmp(name, "service") == 0)
-		{
-			action = new Service;
-		}
-		else
-		{
-			std::cout << "element in route: " << name << std::endl;
-			exit(-1);
-		}
+		int idx;
+		stop->QueryIntAttribute("idx", &idx);
+		requests.push_back(idx);
 
-		action->loadXml(stop);
-		requests.push_back(action_ptr { action });
-
-		stop = stop->NextSiblingElement();
+		stop = stop->NextSiblingElement("stop");
 	}
 }
 
@@ -108,26 +89,35 @@ tinyxml2::XMLElement* Route::saveXml(tinyxml2::XMLElement* parent) const
 
 	tinyxml2::XMLElement* route = parent->GetDocument()->NewElement("route");
 
+	route->SetAttribute("driver", driver);
+
 	for (int i = 0; i < size; i++)
 	{
-		requests.at(i)->saveXml(route)->SetAttribute("order", i);
+		tinyxml2::XMLElement* stop = parent->GetDocument()->NewElement("stop");
+		stop->SetAttribute("idx", requests.at(i));
+		route->InsertEndChild(stop);
 	}
 
 	parent->InsertEndChild(route);
 	return route;
 }
 
-sh_time_t Route::get_time_taken(const int max) const
+const City* Route::get_city() const
 {
-	if (max <= 1)
+	return city;
+}
+
+sh_time_t Route::get_time_to(const int max) const
+{
+	int location = city->get_start_location(driver);
+	sh_time_t end_time = 0;
+	for (int i = 0; i < max; i++)
 	{
-		return 0;
+		const Action* current = city->get_stop(requests.at(i));
+		end_time += get_time_taken(city, end_time, location, current);
+		location = current->get_location();
 	}
-
-	const action_ptr &a1 = requests.at(max - 1);
-	const action_ptr &a2 = requests.at(max - 2);
-
-	return a1->get_time_taken(get_time_taken(max - 1), *a2);
+	return end_time;
 }
 
 
@@ -136,30 +126,31 @@ int Route::get_num_requests_serviced() const
 	int sum = 0;
 	for (unsigned int i = 0; i < requests.size(); i++)
 	{
-		sum += requests.at(i)->get_points();
+		sum += get_points(city->get_stop(requests.at(i))->get_operation());
 	}
 	return sum;
 }
 
 std::ostream& operator<<(std::ostream& os, const Route& r)
 {
-	os << "\tRoute: t=" << r.get_time_taken() << " n=" << r.get_num_requests_serviced() << " path=" << std::endl;
+	os << "\tRoute: t=" << r.get_time_to_end() << " n=" << r.get_num_requests_serviced() << " path=" << std::endl;
 	for (unsigned int i = 0; i < r.requests.size(); i++)
 	{
-		const action_ptr &a = r.requests.at(i);
+		const Action* action = r.city->get_stop(r.requests.at(i));
 
-		os << "\t\t[" << std::setw(4) << i
-				<< " t=" << std::setw(5) << r.get_time_taken(i + 1);
+		sh_time_t ctime = r.get_time_to(i + 1);
+		sh_time_t otime = r.get_time_to(i);
+
+		os << "\t\t[" << std::setw(4) << i << " t=" << std::setw(5) << ctime;
 		if (i != 0)
 		{
-				os << " d=" << std::setw(5) << (r.requests.at(i-1)->get_time_to(*a.get()));
+			os << " d=" << std::setw(5) << (ctime - otime);
 		}
-		os << " : " << *a << "]" << std::endl;
+		else
+		{
+			os << "        ";
+		}
+		os << " : " << *action << "]" << std::endl;
 	}
 	return os;
-}
-
-bool Route::already_serviced(const Request *r) const
-{
-	return std::any_of(requests.begin(), requests.end(), [&r](const action_ptr &a){ return a->satisfies(r); });
 }

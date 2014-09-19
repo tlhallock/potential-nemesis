@@ -16,7 +16,7 @@ Solution ForDriverForStopSolver::solve(const City &city)
 {
 	int num_drivers = p.get_num_drivers();
 
-	Solution *s = new Solution { num_drivers };
+	Solution *s = new Solution { &city };
 	while (true)
 	{
 		bool could_add = false;

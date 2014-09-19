@@ -22,10 +22,10 @@ Solution BestOfManySolver::solve(const City &city)
 {
 	if (delegate == nullptr)
 	{
-		return Solution {p.get_num_drivers()};
+		return Solution {&city};
 	}
 
-	Solution s {p.get_num_drivers()};
+	Solution s {&city};
 	Cost cost;
 
 	int count = 0;

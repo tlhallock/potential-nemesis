@@ -7,38 +7,51 @@
 
 #include "Solution.h"
 
-#include "model/City.h"
+#include "model/Rules.h"
 
-Solution::Solution(int num_drivers)
+Solution::Solution(const City *city_) :
+	city(city_),
+	m_already_serviced{(bool *)calloc(city->get_num_stops(), sizeof(*m_already_serviced))}
 {
+	int num_drivers = city->get_num_trucks();
 	for (int i = 0; i < num_drivers; i++)
 	{
-		routes.push_back(new Route);
+		routes.push_back(Route {city, i});
 	}
 }
 
-Solution::Solution(const Solution& other)
+Solution::Solution(const Solution& other) :
+			city(other.city),
+			m_already_serviced{(bool *)calloc(city->get_num_stops(), sizeof(*m_already_serviced))}
 {
 	int size = other.get_num_drivers();
 	for (int i = 0; i < size; i++)
 	{
-		routes.push_back(new Route {other.get_route(i)});
+		routes.push_back(Route {other.get_route(i)});
 	}
 }
 
 Solution& Solution::operator =(const Solution& other)
 {
-	int num_drivers = get_num_drivers();
-	for (int i = 0; i < num_drivers; i++)
+	if (city->get_num_stops() != other.city->get_num_stops())
 	{
-		delete routes.at(i);
+		puts("Assigning solution to different city!!!");
+		exit(-1);
 	}
-	routes.clear();
+	city = other.city;
 
+	int num_stops = city->get_num_stops();
+
+	for (int i=0;i<num_stops;i++)
+	{
+		m_already_serviced[i] = other.m_already_serviced[i];
+	}
+
+	routes.clear();
 	int size = other.get_num_drivers();
 	for (int i = 0; i < size; i++)
 	{
-		routes.push_back(new Route {other.get_route(i)});
+		routes.push_back(Route {other.get_route(i)});
 	}
 
 	return *this;
@@ -47,11 +60,7 @@ Solution& Solution::operator =(const Solution& other)
 
 Solution::~Solution()
 {
-	int num_drivers = get_num_drivers();
-	for (int i = 0; i < num_drivers; i++)
-	{
-		delete routes.at(i);
-	}
+	free(m_already_serviced);
 }
 
 sh_time_t Solution::get_time_taken() const
@@ -61,7 +70,7 @@ sh_time_t Solution::get_time_taken() const
 	int num_drivers = get_num_drivers();
 	for (int i = 0; i < num_drivers; i++)
 	{
-		sh_time_t another = routes.at(i)->get_time_taken();
+		sh_time_t another = routes.at(i).get_time_to_end();
 		if (another > max)
 		{
 			max = another;
@@ -78,15 +87,25 @@ int Solution::get_num_requests_serviced() const
 	int num_drivers = get_num_drivers();
 	for (int i = 0; i < num_drivers; i++)
 	{
-		sum += routes.at(i)->get_num_requests_serviced();
+		sum += routes.at(i).get_num_requests_serviced();
 	}
 
 	return sum;
 }
 
-Route& Solution::get_route(int index) const
+const Route& Solution::get_route(int index) const
 {
-	return *routes.at(index);
+	return routes.at(index);
+}
+
+Route& Solution::get_route(int index)
+{
+	if (index > routes.size())
+	{
+		std::cout << "Trying to get a route that doesn't exist!" << std::endl;
+	}
+
+	return routes.at(index);
 }
 
 int Solution::get_num_drivers() const
@@ -107,19 +126,16 @@ std::ostream& operator<<(std::ostream& os, const Solution& r)
 	return os;
 }
 
-bool Solution::already_serviced(const Request *r) const
+bool Solution::already_serviced(const Action *r) const
 {
-	if (r == nullptr)
-	{
-		return false;
-	}
-
-	return std::any_of(routes.begin(), routes.end(), [&r](const Route *route) { return route->already_serviced(r); });
+	return (r->get_operation() == Dump
+			|| r->get_operation() == Replace
+			|| r->get_operation() == PickUp)
+			&& m_already_serviced[r->get_index()];
 }
 
 void Solution::loadXml(const tinyxml2::XMLDocument* document)
 {
-	std::for_each(routes.begin(), routes.end(), [](const Route* route) { delete route; });
 	routes.clear();
 
 	const tinyxml2::XMLElement* solution = document->FirstChildElement("solution");
@@ -131,9 +147,8 @@ void Solution::loadXml(const tinyxml2::XMLDocument* document)
 	const tinyxml2::XMLElement* routeXml = solution->FirstChildElement("route");
 	while (routeXml != nullptr)
 	{
-		Route* route = new Route;
-		route->loadXml(routeXml);
-		routes.push_back(route);
+		routes.push_back(Route {city, (int) routes.size()});
+		routes.back().loadXml(routeXml);
 
 		routeXml = routeXml->NextSiblingElement();
 	}
@@ -152,11 +167,23 @@ tinyxml2::XMLElement*  Solution::saveXml(tinyxml2::XMLDocument* document) const
 	int size = routes.size();
 	for (int i = 0; i < size; i++)
 	{
-		routes.at(i)->saveXml(solution)->SetAttribute("num", i);
+		routes.at(i).saveXml(solution);
 	}
 
 	document->InsertEndChild(solution);
 	return solution;
+}
+
+bool Solution::service_next(int driver, const Action* action)
+{
+	if (!is_possible(city, this, routes.at(driver).get_time_to_end(), routes.at(driver).get_last_action(), action))
+	{
+		std::cout << "Impossible state:\n" << *action << " from driver " << driver << " in \n" << *this << std::endl;
+		exit(-1);
+		return false;
+	}
+	routes.at(driver).service_next(action);
+	return true;
 }
 
 void Solution::validate(const City& city)

@@ -24,18 +24,18 @@ bool RandomGeneratorSolver::get_next_request(
 		int driver)
 {
 	Route& output = s->get_route(driver);
-	std::vector<action_ptr> *possibles = get_possibles(
+	std::vector<const Action*> *possibles = get_possibles(
 			s,
-			output.get_time_taken(),
+			output.get_time_to_end(),
 			output.get_last_action(),
-			city.get_all_actions());
+			city);
 
-	std::unique_ptr < std::vector<action_ptr> > dme { possibles };
+	std::unique_ptr < std::vector<const Action*> > dme { possibles };
 
 	if (possibles->size() == 0)
 	{
 		return false;
 	}
 
-	return output.service_next(possibles->at(rand() % possibles->size()));
+	return s->service_next(driver, possibles->at(rand() % possibles->size()));
 }

@@ -13,14 +13,21 @@
 
 bool operation_follows(Operation prev_operation, Operation next_operation);
 
-bool is_possible(const action_ptr prev_action,
-		const action_ptr action,
-		const sh_time_t start_time, const Solution * const s);
 
-std::vector<action_ptr>* get_possibles(
+bool follows_in_time(const City *city, sh_time_t start_time, location from, const Action* to);
+
+sh_time_t get_time_taken(const City *city, sh_time_t start_time, location from, const Action* to);
+
+bool is_possible(const City* city,
+		const Solution * s,
+		const sh_time_t start_time,
+		const Action* prev_action,
+		const Action* action);
+
+std::vector<const Action*>* get_possibles(
 		const Solution *s,
 		sh_time_t start_time,
-		const action_ptr &prev_action,
-		const std::vector<action_ptr>& all_possibles);
+		const Action* prev_action,
+		const City &city);
 
 #endif /* TRUCK_H_ */

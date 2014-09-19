@@ -147,3 +147,58 @@ std::string get_size_text(DumpsterSize size)
 		default:			return "*";
 	}
 }
+
+int get_points(Operation operation)
+{
+	switch (operation)
+	{
+		case PickUp:
+			return 1;
+		case DropOff:
+			return 1;
+		case Dump:
+			return 0;
+		case Store:
+			return 0;
+		case UnStore:
+			return 0;
+		case Replace:
+			return 2;
+		default:
+			std::cout << "Uh Oh!!!! fdsfdlkjafd" << std::endl;
+			exit(-1);
+			return -1;
+	}
+}
+
+std::string truck_to_string(TruckType typ)
+{
+	switch (typ)
+	{
+		case lithe:
+			return "1";
+		case normal:
+			return "2";
+		case strong:
+			return "3";
+	}
+	return "2";
+}
+
+TruckType string_to_truck(const char *string)
+{
+	if (strcmp(string, "1") == 0)
+	{
+		return lithe;
+	}
+	else if (strcmp(string, "2") == 0)
+	{
+		return normal;
+
+	}
+	else if (strcmp(string, "3") == 0)
+	{
+		return strong;
+	}
+	return normal;
+}

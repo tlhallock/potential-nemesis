@@ -17,11 +17,13 @@
 
 #include <unistd.h>
 
-void test_solver(Solver &&solver, const City &requests, bool best_of_many = true)
+void test_solver(Solver &&solver, const City *requests, bool best_of_many = true)
 {
+	std::cout << "city = " << requests << std::endl;
+
 	std::string name = solver.get_name();
 	const Parameters &p = solver.get_params();
-	Solution sol = solver.solve(requests);
+	Solution sol = solver.solve(*requests);
 	std::cout << "Optimal " << name << " solution n=" << sol.get_num_requests_serviced() << std::endl;
 	svg_print_solution(name, sol, p);
 	std::ofstream log {"sol." + name + ".txt" };
@@ -33,7 +35,7 @@ void test_solver(Solver &&solver, const City &requests, bool best_of_many = true
 		sol.XmlRootObject::saveXml("test_sol.xml");
 		std::cout << "Saving " << sol << std::endl;
 
-		Solution another {p.get_num_drivers()};
+		Solution another {requests};
 		another.XmlRootObject::loadXml("test_sol.xml");
 		another.XmlRootObject::saveXml(stdout);
 	}
@@ -78,9 +80,9 @@ int main(int argc, char **argv)
 	//srand(5000013);
 	Parameters p;
 
-	City city = generate_city(p);
-	city.XmlRootObject::saveXml("city.xml");
-	city.XmlRootObject::saveXml(stdout);
+	City *city = generate_city(p);
+	city->XmlRootObject::saveXml("city.xml");
+	city->XmlRootObject::saveXml(stdout);
 
 	svg_print_city("random", city, p);
 

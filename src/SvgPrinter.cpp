@@ -8,7 +8,6 @@
 #include "SvgPrinter.h"
 
 #include "common.h"
-#include "model/Landfills.h"
 
 #include <iostream>
 #include <fstream>
@@ -122,43 +121,42 @@ namespace
 	}
 
 	/** These could both implement the same interface at least. **/
-	std::string action_text(const Request &a)
+	std::string action_text(const Action* a)
 	{
-		return operation_to_svg(a.get_operation()) + get_size_text(a);
-	}
-	std::string action_text(const Action &a)
-	{
-		return operation_to_svg(a.get_operation()) + get_size_text(a);
+		return operation_to_svg(a->get_operation()) + get_size_text(a->get_input_dumpster_size())
+							 + get_size_text(a->get_output_dumpster_size());
 	}
 
-	void print_request(std::ofstream &svg_stream, const Request &solution)
+	void print_stop(std::ofstream &svg_stream, const City* city, const Action* solution)
 	{
-		print_string(svg_stream, solution, action_text(solution));
+		print_string(svg_stream, city->get_location(solution->get_location()), action_text(solution));
 	}
 
-	void print_requests(std::ofstream &svg_stream, const City &city)
+	void print_stops(std::ofstream &svg_stream, const City *city)
 	{
-		int size = city.get_num_requests();
+		int size = city->get_num_stops();
 		for (int i = 0; i < size; i++)
 		{
-			print_request(svg_stream, city.get_request(i));
+			print_stop(svg_stream, city, city->get_stop(i));
 		}
 	}
 
 	void print_route(std::ofstream &svg_stream, const Route &solution, const std::string &color)
 	{
+		const City* city = solution.get_city();
+
 		int size = solution.get_num_actions();
 		for (int i = 0; i < size - 1; i++)
 		{
-			const Action& a1 = solution.get_action(i);
-			const Action& a2 = solution.get_action(i + 1);
+			const Location& l1 = city->get_location(solution.get_action(i  )->get_location());
+			const Location& l2 = city->get_location(solution.get_action(i+1)->get_location());
 
-			print_line(svg_stream, a1, a2, color);
+			print_line(svg_stream, l1, l2, color);
 
 			std::stringstream ss;
 			ss << i << ":" ;
-			ss << action_text(a2);
-			print_string(svg_stream, a2, ss.str());
+			ss << action_text(solution.get_action(i+1));
+			print_string(svg_stream, l2, ss.str());
 		}
 	}
 
@@ -168,24 +166,6 @@ namespace
 		for (int i = 0; i < drivers; i++)
 		{
 			print_route(svg_stream, solution.get_route(i), next_color());
-		}
-	}
-
-	void print_land_fills(std::ofstream &svg_stream, const City &city)
-	{
-		int size = city.get_num_land_fills();
-		for (int i=0; i<size; i++)
-		{
-			print_string(svg_stream, city.get_land_fill(i), "L");
-		}
-	}
-
-	void print_staging_areas(std::ofstream &svg_stream, const City &city)
-	{
-		int size = city.get_num_staging_areas();
-		for (int i=0; i<size; i++)
-		{
-			print_string(svg_stream, city.get_staging_area(i), "S");
 		}
 	}
 
@@ -203,14 +183,11 @@ namespace
 	}
 }
 
-void svg_print_city(const std::string &filename, const City &city, const Parameters &p)
+void svg_print_city(const std::string &filename, const City *city, const Parameters &p)
 {
 	std::ofstream svg_stream { filename + ".req.svg" };
 	print_preamble(svg_stream, "requests", p);
-	print_requests(svg_stream, city);
-	print_land_fills(svg_stream, city);
-	print_staging_areas(svg_stream, city);
-	// print staging areas
+	print_stops(svg_stream, city);
 	print_postamble(svg_stream);
 }
 

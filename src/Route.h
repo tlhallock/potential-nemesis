@@ -9,41 +9,46 @@
 #define ROUTE_H_
 
 #include "model/Action.h"
+#include "model/City.h"
 
 #include <vector>
 
 class Optimizer;
+class Solution;
+class City;
 
 class Route : public XmlObject
 {
 	friend class Optimizer;
-
+	friend class Solution;
 public:
-	Route();
+	Route(const City* city, int driver);
 	Route(const Route &other);
 	virtual ~Route();
 
-	sh_time_t get_time_taken() const;
+	sh_time_t get_time_to_end() const;
 	int get_num_requests_serviced() const;
 
-	bool can_service_next(action_ptr req) const;
-	bool service_next(action_ptr req);
+	bool can_service_next(const Action* req) const;
 	const Location &get_current_location() const;
 
 	int get_num_actions() const;
-	const Action &get_action(int index) const;
-	const action_ptr &get_last_action() const;
+	const Action* get_action(int index) const;
+	const Action* get_last_action() const;
 
-	bool already_serviced(const Request *r) const;
+	const City* get_city() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Route& r);
 
 	virtual void loadXml(const tinyxml2::XMLElement* element);
 	virtual tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
 private:
-	sh_time_t get_time_taken(const int i) const;
+	void service_next(const Action* req);
+	sh_time_t get_time_to(const int i) const;
 
-	std::vector<route_stop> requests;
+	const City* city;
+	int driver;
+	std::vector<int> requests;
 };
 
 #endif /* ROUTE_H_ */

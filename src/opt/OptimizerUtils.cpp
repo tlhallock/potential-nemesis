@@ -32,12 +32,12 @@ int random_decreasing_probability(int max, double rate)
 }
 
 
-action_ptr get_close(const Location &current_location, std::vector<action_ptr> *possibles)
+const Action* get_close(const City *city, sh_time_t start_time, location from, std::vector<const Action*> *possibles)
 {
-	std::sort(possibles->begin(), possibles->end(), [&current_location](const action_ptr &i1, const action_ptr &i2)
+	std::sort(possibles->begin(), possibles->end(), [city, start_time, &from](const Action* i1, const Action* i2)
 	{
-		sh_time_t t1 = i1->get_time_to(current_location);
-		sh_time_t t2 = i2->get_time_to(current_location);
+		sh_time_t t1 = get_time_taken(city, start_time, from, i1);
+		sh_time_t t2 = get_time_taken(city, start_time, from, i2);
 		return t1 < t2;
 	});
 
@@ -52,19 +52,21 @@ action_ptr get_close(const Location &current_location, std::vector<action_ptr> *
 namespace
 {
 	void get_matching_sizes(const City& city,
-			bool (*filter)(const action_ptr& aptr),
+			bool (*filter)(const City& city, const Action* aptr),
 			DumpsterSize prev, DumpsterSize next,
-			std::vector<action_ptr> &out)
+			std::vector<const Action* > &out)
 	{
-		const std::vector<action_ptr>& actions = city.get_all_actions();
-		auto end = actions.end();
-		for (auto it = actions.begin(); it != end; ++it)
+		const std::vector<const Action *>& actions = city.get_all_stops();
+		int end = actions.size();
+
+		for (int i=0; i<end;i++)
 		{
-			if (prev != (*it)->get_input_dumpster_size())
+			const Action* action = actions.at(i);
+			if (prev != action->get_input_dumpster_size())
 			{
 				continue;
 			}
-			if (next != (*it)->get_output_dumpster_size())
+			if (next != action->get_output_dumpster_size())
 			{
 				continue;
 			}
@@ -77,19 +79,19 @@ namespace
 //				continue;
 //			}
 
-			if (filter != nullptr && filter(*it))
+			if (filter != nullptr && filter(city, action))
 			{
 				continue;
 			}
 
-			out.push_back(*it);
+			out.push_back(action);
 		}
 	}
 }
 
 void get_necessary_actions(const City &city, Solution *s, sh_time_t start_time,
-		const action_ptr& prev_action, const action_ptr& next_request,
-		std::vector<action_ptr> &outparam, sh_time_t& outtime, const operation_location_constraint& constraints)
+		const Action* prev_action, const Action* next_request,
+		std::vector<const Action* > &outparam, sh_time_t& outtime, const operation_location_constraint& constraints)
 {
 	outparam.clear();
 
@@ -107,6 +109,7 @@ void get_necessary_actions(const City &city, Solution *s, sh_time_t start_time,
 			(prev_size != next_size && next_size != 0)
 			)
 	{
+#if 0
 		int num_staging_areas = city.get_num_staging_areas();
 		for (int i=0; i<num_staging_areas; i++)
 		{
@@ -115,44 +118,45 @@ void get_necessary_actions(const City &city, Solution *s, sh_time_t start_time,
 		}
 
 		outtime = sh_time_max;
+#endif
 		return;
 	}
 
 	// otherwise we only need to have one link between us...
 	outtime = sh_time_max;
-	action_ptr minimum_action {nullptr};
+	const Action* minimum_action = nullptr;
 
-	std::vector<action_ptr> middles;
+	std::vector<const Action* > middles;
 	get_matching_sizes(city, nullptr, prev_size, next_size, middles);
 
 	auto end = middles.end();
 	for (auto it = middles.begin(); it != end; ++it)
 	{
-		const action_ptr &middle_action = *it;
-		if (!satisfies_operation_constraint(middle_action, constraints))
+		const Action* middle = *it;
+		if (!satisfies_operation_constraint(middle, constraints))
 		{
 			continue;
 		}
 
-		if (!is_possible(prev_action, middle_action, start_time, s))
+		if (!is_possible(&city, s, start_time, prev_action, middle))
 		{
 			continue;
 		}
 
-		sh_time_t middle_time = middle_action->get_time_taken(start_time, *prev_action.get());
-		if (!is_possible(middle_action, next_request, middle_time, s))
+		sh_time_t middle_time = get_time_taken(&city, start_time, prev_action->get_location(), middle);
+		if (!is_possible(&city, s, middle_time, middle, next_request))
 		{
 			continue;
 		}
 
-		sh_time_t end_time = next_request->get_time_taken(start_time, *middle_action.get());
+		sh_time_t end_time = get_time_taken(&city, start_time, middle->get_location(), next_request);
 		if (end_time >= outtime)
 		{
 			continue;
 		}
 
 		outtime = end_time;
-		minimum_action = middle_action;
+		minimum_action = middle;
 	}
 
 	if (outtime == sh_time_max)

@@ -9,7 +9,6 @@
 
 #include "opt/OptimizerUtils.h"
 #include "model/Rules.h"
-#include "model/Service.h"
 
 #include <algorithm>
 
@@ -22,7 +21,7 @@ namespace
 		~TimeTo() {}
 
 		sh_time_t time_taken;
-		std::vector<action_ptr> actions;
+		std::vector<const Action*> actions;
 
 		bool operator<(const TimeTo &other) const
 		{
@@ -43,17 +42,14 @@ bool NearestPointSolver::get_next_request(
 
 	Route& route = s->get_route(driver);
 
-	sh_time_t start_time = route.get_time_taken();
-	action_ptr prev_action = route.get_last_action();
+	sh_time_t start_time = route.get_time_to_end();
+	const Action* prev_action = route.get_last_action();
 
-	int num_requests = city.get_num_requests();
-	for (int i = 0; i < num_requests; i++)
+	int num_stops = city.get_num_stops();
+	for (int i = 0; i < num_stops; i++)
 	{
-		const Request& req = city.get_request(i);
-
-		action_ptr next_action { new Service {&req} };
-
-		if (is_possible(prev_action, next_action, start_time, s))
+		const Action* next_action = city.get_stop(i);
+		if (is_possible(&city, s, start_time, prev_action, next_action))
 		{
 			if (!satisfies_operation_constraint(next_action, get_constraints(city, driver)))
 			{
@@ -96,7 +92,7 @@ bool NearestPointSolver::get_next_request(
 	TimeTo *best = times.at(random_decreasing_probability(times.size()));
 	for (int i = 0; i < (int) best->actions.size(); i++)
 	{
-		route.service_next(best->actions.at(i));
+		s->service_next(driver, best->actions.at(i));
 	}
 
 	std::for_each(times.begin(), times.end(), [](const TimeTo * const i) { delete i; });

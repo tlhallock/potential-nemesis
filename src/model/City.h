@@ -19,23 +19,33 @@ public:
 	City();
 	~City();
 
+	int get_start_location(int driver) const;
+	int get_start_action(int driver) const;
+
 	int get_num_stops() const;
 	const Action *get_stop(int index) const;
+	const std::vector<const Action*> &get_all_stops() const;
 
-	sh_time_t get_time_from(int i, int j);
+	sh_time_t get_time_from(location i, location j) const;
 
 	void add_stop(Action *action);
-
-	const std::vector<const Action *> &get_all_stops() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const City& r);
 
 	void loadXml(const tinyxml2::XMLDocument* document);
 	tinyxml2::XMLElement* saveXml(tinyxml2::XMLDocument* document) const;
 
-	int add_location(const Location & l);
+	location add_location(const Location & l);
+
+	int get_num_trucks() const;
+	void add_truck(TruckType truck_type);
+
+	const Location& get_location(location l) const;
 private:
-	std::vector<Action *> all_actions;
+	std::vector<const Action *> all_actions;
+	std::vector<Location> all_locations;
+	std::vector<TruckType> truck_types;
+	const Action* start_action;
 };
 
 #endif /* CITY_H_ */

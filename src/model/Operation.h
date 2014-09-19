@@ -46,4 +46,9 @@ DumpsterSize string_to_size(const char *str);
 
 std::string get_size_text(DumpsterSize size);
 
+int get_points(Operation operation);
+
+std::string truck_to_string(TruckType typ);
+TruckType string_to_truck(const char * string);
+
 #endif /* OPERATION_H_ */

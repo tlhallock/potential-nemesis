@@ -17,17 +17,20 @@ class City;
 class Solution : public XmlRootObject
 {
 public:
-	Solution(int num_drivers);
+	Solution(const City* city);
 	Solution(const Solution &other);
 	~Solution();
+
+	bool service_next(int driver, const Action* action);
 
 	sh_time_t get_time_taken() const;
 	int get_num_requests_serviced() const;
 
 	int get_num_drivers() const;
-	Route &get_route(int index) const;
+	const Route &get_route(int index) const;
+	Route &get_route(int index);
 
-	bool already_serviced(const Request *r) const;
+	bool already_serviced(const Action* action) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Solution& r);
 	Solution& operator=(const Solution& other);
@@ -37,7 +40,10 @@ public:
 
 	void validate(const City& city);
 private:
-	std::vector<Route *> routes;
+	const City* city;
+	std::vector<Route> routes;
+
+	bool *m_already_serviced;
 };
 
 #endif /* SOLUTION_H_ */

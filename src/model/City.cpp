@@ -7,14 +7,13 @@
 
 #include "model/City.h"
 #include "Solution.h"
-#include "model/FillLand.h"
-#include "model/Service.h"
+#include "model/Location.h"
 
 #include "float.h"
 
 #include <fstream>
 
-City::City() {}
+City::City() : start_action {new Action} { all_actions.push_back(start_action); }
 City::~City() {}
 
 int City::get_num_stops() const
@@ -27,19 +26,46 @@ const Action* City::get_stop(int index) const
 	return all_actions.at(index);
 }
 
-sh_time_t City::get_time_from(int i, int j)
+sh_time_t City::get_time_from(location i, location j) const
 {
-	return 0.0;
+	return all_locations.at(i).get_time_to(all_locations.at(j));
 }
 
 void City::add_stop(Action* action)
 {
+	action->set_index(all_actions.size());
 	all_actions.push_back(action);
 }
 
 const std::vector<const Action*>& City::get_all_stops() const
 {
 	return all_actions;
+}
+
+int City::get_start_location(int driver) const
+{
+	return 0;
+}
+
+const Location& City::get_location(location l) const
+{
+	return all_locations.at(l);
+}
+
+location City::add_location(const Location& l)
+{
+	all_locations.push_back(l);
+	return all_locations.size() - 1;
+}
+
+int City::get_num_trucks() const
+{
+	return truck_types.size();
+}
+
+void City::add_truck(TruckType truck_type)
+{
+	truck_types.push_back(truck_type);
 }
 
 #if 0
@@ -65,7 +91,6 @@ const Landfill& City::get_closest_landfill(const Location& loc) const
 }
 #endif
 
-#if 0
 
 void City::loadXml(const tinyxml2::XMLDocument *document)
 {
@@ -76,51 +101,30 @@ void City::loadXml(const tinyxml2::XMLDocument *document)
 		exit(-1);
 	}
 
-	const tinyxml2::XMLElement* list = element->FirstChildElement();
-	while (list != nullptr)
+	const tinyxml2::XMLElement* actions = element->FirstChildElement("actions")->FirstChildElement("action");
+	while (actions != nullptr)
 	{
-		const char* name = list->Name();
-		if (strcmp(name, "landfills") == 0)
-		{
-			const tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
-			while (landfill_list != nullptr)
-			{
-				Landfill l;
-				l.loadXml(landfill_list);
-				landfill_list = landfill_list->NextSiblingElement();
-				land_fills.push_back(l);
-			}
-		}
-		else if (strcmp(name, "stagingareas") == 0)
-		{
-			const tinyxml2::XMLElement* landfill_list = list->FirstChildElement();
-			while (landfill_list != nullptr)
-			{
-				StagingArea l;
-				l.loadXml(landfill_list);
-				landfill_list = landfill_list->NextSiblingElement();
-				staging_areas.push_back(l);
-			}
-		}
-		else if (strcmp(name, "requests") == 0)
-		{
-			const tinyxml2::XMLElement* requestList = list->FirstChildElement();
-			while (requestList != nullptr)
-			{
-				Request r;
-				r.loadXml(requestList);
-				requestList = requestList->NextSiblingElement();
-				requests.push_back(r);
-			}
-		}
-		else
-		{
-			std::cout << "Unknown element name: " << name <<"." << std::endl;
-			std::cout << "Goodbye cruel world!" << std::endl;
-			exit(-1);
-		}
+		Action *action = new Action;
+		action->loadXml(actions);
 
-		list = list->NextSiblingElement();
+		actions = actions->NextSiblingElement();
+	}
+
+	const tinyxml2::XMLElement* trucks = element->FirstChildElement("trucks")->FirstChildElement("truck");
+	while (trucks != nullptr)
+	{
+		add_truck(string_to_truck(trucks->Attribute("type")));
+		trucks = trucks->NextSiblingElement();
+	}
+
+	const tinyxml2::XMLElement* locs = element->FirstChildElement("locations")->FirstChildElement("location");
+	while (locs != nullptr)
+	{
+		Location loc;
+		loc.loadXml(locs);
+		all_locations.push_back(loc);
+
+		locs = locs->NextSiblingElement();
 	}
 }
 
@@ -128,34 +132,41 @@ tinyxml2::XMLElement* City::saveXml(tinyxml2::XMLDocument *document) const
 {
 	tinyxml2::XMLElement* city = document->NewElement("city");
 
-	tinyxml2::XMLElement* requestlist = document->NewElement("requests");
-	city->InsertEndChild(requestlist);
-	requestlist->SetAttribute("len", (int) requests.size());
-	std::for_each(requests.begin(), requests.end(), [requestlist](const Request &r)
+	tinyxml2::XMLElement* actions = document->NewElement("actions");
+	std::for_each(all_actions.begin(), all_actions.end(), [&actions](const Action* action)
 	{
-		r.saveXml(requestlist);
+		action->saveXml(actions);
 	});
+	city->InsertEndChild(actions);
+
+	tinyxml2::XMLElement* trucks = document->NewElement("trucks");
+	std::for_each(truck_types.begin(), truck_types.end(), [&document, &trucks](TruckType type)
+	{
+		tinyxml2::XMLElement* t = document->NewElement("truck");
+		t->SetAttribute("type", truck_to_string(type).c_str());
+		trucks->InsertEndChild(t);
+	});
+	city->InsertEndChild(trucks);
+
+	tinyxml2::XMLElement* locs = document->NewElement("locations");
+	for (int i = 0; i < (int) all_locations.size(); i++)
+	{
+		const Location& loc = all_locations.at(i);
+		loc.saveXml(locs)->SetAttribute("idx", i);
+	}
+	city->InsertEndChild(locs);
 
 
-	tinyxml2::XMLElement* landfills = document->NewElement("landfills");
-	city->InsertEndChild(landfills);
-	landfills->SetAttribute("len", (int) land_fills.size());
-	std::for_each(land_fills.begin(), land_fills.end(), [landfills](const Landfill &r)
-	{
-		r.saveXml(landfills);
-	});
-
-	tinyxml2::XMLElement* stagingareas = document->NewElement("stagingareas");
-	city->InsertEndChild(stagingareas);
-	stagingareas->SetAttribute("len", (int) staging_areas.size());
-	std::for_each(staging_areas.begin(), staging_areas.end(), [stagingareas](const StagingArea &r)
-	{
-		r.saveXml(stagingareas);
-	});
 	document->InsertEndChild(city);
 	return city;
 }
 
+int City::get_start_action(int driver) const
+{
+	return 0;
+}
+
+#if 0
 
 void City::refresh_all_actions()
 {
