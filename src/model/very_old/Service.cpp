@@ -7,12 +7,8 @@
 
 #include "model/Service.h"
 
-Service::Service(const Request *req) :
-	Action {*req,
-		req->get_operation(),
-		req->get_input_dumpster_size(),
-		req->get_output_dumpster_size()} {}
-
+Service::Service(const Request *req_) : Action {*req_, *req_}, req{req_} {}
+Service::Service() : Action {}, req {nullptr} {}
 Service::~Service() {}
 
 sh_time_t Service::get_time_taken(sh_time_t start_time, const Location& from) const
@@ -37,7 +33,23 @@ bool Service::satisfies(const Request *r) const
 		&& get_operation() == r->get_operation();
 }
 
+
 const Request* Service::get_serviced_request() const
 {
 	return req;
+}
+
+void Service::loadXml(const tinyxml2::XMLElement* element)
+{
+	OperationInfo::loadXml(element);
+	Location::loadXml(element);
+}
+
+tinyxml2::XMLElement* Service::saveXml(tinyxml2::XMLElement* parent) const
+{
+	tinyxml2::XMLElement* service = parent->GetDocument()->NewElement("service");
+	OperationInfo::saveXml(service);
+	Location::saveXml(service);
+	parent->InsertEndChild(service);
+	return service;
 }

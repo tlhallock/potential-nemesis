@@ -17,25 +17,32 @@
 City::City() {}
 City::~City() {}
 
-int City::get_num_requests() const
+int City::get_num_stops() const
 {
-	return requests.size();
+	return all_actions.size();
 }
 
-const Landfill& City::get_land_fill(int index) const
+const Action* City::get_stop(int index) const
 {
-	return land_fills.at(index);
+	return all_actions.at(index);
 }
 
-int City::get_num_land_fills() const
+sh_time_t City::get_time_from(int i, int j)
 {
-	return land_fills.size();
+	return 0.0;
 }
 
-const Request& City::get_request(int i) const
+void City::add_stop(Action* action)
 {
-	return requests.at(i);
+	all_actions.push_back(action);
 }
+
+const std::vector<const Action*>& City::get_all_stops() const
+{
+	return all_actions;
+}
+
+#if 0
 
 const Landfill& City::get_closest_landfill(const Location& loc) const
 {
@@ -56,11 +63,9 @@ const Landfill& City::get_closest_landfill(const Location& loc) const
 
 	return *lm;
 }
+#endif
 
-const std::vector<action_ptr>& City::get_all_actions() const
-{
-	return all_actions;
-}
+#if 0
 
 void City::loadXml(const tinyxml2::XMLDocument *document)
 {
@@ -151,6 +156,7 @@ tinyxml2::XMLElement* City::saveXml(tinyxml2::XMLDocument *document) const
 	return city;
 }
 
+
 void City::refresh_all_actions()
 {
 	all_actions.clear();
@@ -161,38 +167,27 @@ void City::refresh_all_actions()
 	});
 	std::for_each(land_fills.begin(), land_fills.end(), [this](const Landfill& l)
 	{
-		all_actions.push_back(action_ptr {new FillLand {l, smallest}});
-		all_actions.push_back(action_ptr {new FillLand {l, small}});
-		all_actions.push_back(action_ptr {new FillLand {l, big}});
-		all_actions.push_back(action_ptr {new FillLand {l, biggest}});
+		all_actions.push_back(action_ptr {new FillLand {l, smallest }});
+		all_actions.push_back(action_ptr {new FillLand {l, small    }});
+		all_actions.push_back(action_ptr {new FillLand {l, big      }});
+		all_actions.push_back(action_ptr {new FillLand {l, biggest  }});
 	});
 	std::for_each(staging_areas.begin(), staging_areas.end(), [this](const StagingArea &a)
 	{
-		all_actions.push_back(action_ptr{new Action {a, Store, smallest, none}});
-		all_actions.push_back(action_ptr{new Action {a, Store, small,    none}});
-		all_actions.push_back(action_ptr{new Action {a, Store, big,      none}});
-		all_actions.push_back(action_ptr{new Action {a, Store, biggest,  none}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {Store, smallest, none }}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {Store, small,    none }}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {Store, big,      none }}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {Store, biggest,  none }}});
 	});
 	std::for_each(staging_areas.begin(), staging_areas.end(), [this](const StagingArea &a)
 	{
-		all_actions.push_back(action_ptr{new Action {a, UnStore, none, smallest}});
-		all_actions.push_back(action_ptr{new Action {a, UnStore, none, small}});
-		all_actions.push_back(action_ptr{new Action {a, UnStore, none, big}});
-		all_actions.push_back(action_ptr{new Action {a, UnStore, none, biggest}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {UnStore, none, smallest }}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {UnStore, none, small    }}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {UnStore, none, big      }}});
+		all_actions.push_back(action_ptr{new Action {a, OperationInfo {UnStore, none, biggest  }}});
 	});
 }
 
-
-
-int City::get_num_staging_areas() const
-{
-	return staging_areas.size();
-}
-
-const StagingArea& City::get_staging_area(int idx) const
-{
-	return staging_areas.at(idx);
-}
 
 std::ostream& operator<<(std::ostream& os, const City& c)
 {
@@ -220,6 +215,7 @@ std::ostream& operator<<(std::ostream& os, const City& c)
 
 	return os;
 }
+#endif
 
 #if 0
 std::ostream& operator>>(std::ostream& os, City& c)
@@ -259,23 +255,3 @@ std::ostream& operator>>(std::ostream& os, City& c)
 }
 #endif
 
-
-void City::set_requests(std::vector<Request> requests_)
-{
-	requests = requests_;
-	refresh_all_actions();
-	std::sort(requests.begin(), requests.end(), [](const Request &r1, const Request &r2)
-			{ return r1.get_minimum_time() < r2.get_minimum_time(); });
-}
-
-void City::set_land_fills(std::vector<Landfill> land_fills_)
-{
-	land_fills = land_fills_;
-	refresh_all_actions();
-}
-
-void City::set_staging_areas(std::vector<StagingArea> staging_areas_)
-{
-	staging_areas = staging_areas_;
-	refresh_all_actions();
-}

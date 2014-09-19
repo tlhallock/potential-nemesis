@@ -43,7 +43,7 @@ public:
 private:
 	sh_time_t get_time_taken(const int i) const;
 
-	std::vector<action_ptr> requests;
+	std::vector<route_stop> requests;
 };
 
 #endif /* ROUTE_H_ */

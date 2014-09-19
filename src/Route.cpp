@@ -12,12 +12,14 @@
 #include "model/FillLand.h"
 #include "model/Request.h"
 
+#include "model/Service.h"
+
 #include <algorithm>
 #include <iomanip>
 
 Route::Route()
 {
-	requests.push_back(get_start_action());
+	requests.push_back(action_ptr {get_start_action()} );
 }
 
 Route::Route(const Route &other)
@@ -72,14 +74,31 @@ const action_ptr &Route::get_last_action() const
 
 void Route::loadXml(const tinyxml2::XMLElement* element)
 {
-	const tinyxml2::XMLElement* stop = element->FirstChildElement("action");
+	requests.clear();
+
+	const tinyxml2::XMLElement* stop = element->FirstChildElement();
 	while (stop != nullptr)
 	{
-		Action* action = new Action;
+		Action* action = nullptr;
+		const char *name = stop->Name();
+		if (strcmp(name, "action") == 0)
+		{
+			action = new Action;
+		}
+		else if (strcmp(name, "service") == 0)
+		{
+			action = new Service;
+		}
+		else
+		{
+			std::cout << "element in route: " << name << std::endl;
+			exit(-1);
+		}
+
 		action->loadXml(stop);
 		requests.push_back(action_ptr { action });
 
-		stop = stop->NextSiblingElement("action");
+		stop = stop->NextSiblingElement();
 	}
 }
 

@@ -8,13 +8,10 @@
 #ifndef CITY_H_
 #define CITY_H_
 
-#include "model/StagingArea.h"
-#include "model/Landfills.h"
-#include "model/Request.h"
+#include "model/Action.h"
 
 #include "XmlObject.h"
 
-class Solution;
 
 class City : public XmlRootObject
 {
@@ -22,35 +19,23 @@ public:
 	City();
 	~City();
 
-	int get_num_requests() const;
-	const Request &get_request(int i) const;
+	int get_num_stops() const;
+	const Action *get_stop(int index) const;
 
-	int get_num_land_fills() const;
-	const Landfill& get_land_fill(int index) const;
-	const Landfill &get_closest_landfill(const Location &l) const;
+	sh_time_t get_time_from(int i, int j);
 
-	int get_num_staging_areas() const;
-	const StagingArea &get_staging_area(int idx) const;
+	void add_stop(Action *action);
 
-	void set_requests(std::vector<Request> requests);
-	void set_land_fills(std::vector<Landfill> land_fills);
-	void set_staging_areas(std::vector<StagingArea> staging_areas);
-
-	const std::vector<action_ptr> &get_all_actions() const;
+	const std::vector<const Action *> &get_all_stops() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const City& r);
 
 	void loadXml(const tinyxml2::XMLDocument* document);
 	tinyxml2::XMLElement* saveXml(tinyxml2::XMLDocument* document) const;
+
+	int add_location(const Location & l);
 private:
-
-	void refresh_all_actions();
-
-	std::vector<Request> requests;
-	std::vector<Landfill> land_fills;
-	std::vector<StagingArea> staging_areas;
-
-	std::vector<action_ptr> all_actions;
+	std::vector<Action *> all_actions;
 };
 
 #endif /* CITY_H_ */

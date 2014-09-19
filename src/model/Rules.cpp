@@ -61,7 +61,6 @@ bool old_operation_follows(Operation prev_operation, Operation next_operation)
 	}
 }
 
-
 }
 
 inline bool sizes_match(const action_ptr &a1, const action_ptr &a2)
@@ -92,20 +91,20 @@ inline bool operation_follows(Operation prev_operation, Operation next_operation
 	}
 }
 
-bool is_possible(const action_ptr prev_action, const action_ptr action, const sh_time_t start_time, const Solution * const s)
+bool is_possible(const Action* prev_action, const action_ptr action, const sh_time_t start_time, const Solution * const s)
 {
-	return		start_time < sh_time_look_ahead
+	return          start_time < sh_time_look_ahead
 			&& operation_follows(prev_action->get_operation(), action->get_operation())
 			&& action->follows_in_time(start_time, *prev_action.get())
 			&& !s->already_serviced(action->get_serviced_request())
 			&& sizes_match(prev_action, action);
 }
 
-std::vector<action_ptr>* get_possibles(
+std::vector<route_stop>* get_possibles(
 		const Solution *s,
 		sh_time_t start_time,
-		const action_ptr& prev_action,
-		const std::vector<action_ptr>& all_possibles)
+		route_stop prev_action,
+		const std::vector<route_stop>& all_possibles)
 {
 	std::vector<action_ptr> *actions = new std::vector<action_ptr>;
 
@@ -124,3 +123,31 @@ std::vector<action_ptr>* get_possibles(
 	}
 	return actions;
 }
+
+
+
+sh_time_t get_time_taken(const City *city, sh_time_t start_time, action_ptr from, action_ptr to) const
+{
+	const Action* stop = city->get_stop(to);
+
+	sh_time_t end_time = start_time;
+	end_time += city->get_time_from(city->get_stop(from)->get_location(), stop->get_location());
+	if (end_time < city->stop->get_minimum_time())
+	{
+		end_time = stop->get_minimum_time();
+	}
+	end_time += stop->get_wait_time();
+
+	return end_time;
+	return start_time + from.get_time_to(*this);
+}
+
+bool follows_in_time(const City *city, sh_time_t start_time, action_ptr from, action_ptr to) const
+{
+	sh_time_t time = get_time_taken(city, start_time, from, to);
+	return time < city->get_stop(to)->get_maximum_time() &&
+
+			time > city->get_stop(to)->get_minimum_time()
+			;
+}
+

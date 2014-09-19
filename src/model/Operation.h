@@ -29,6 +29,13 @@ typedef enum
 	Replace,
 } Operation;
 
+typedef enum
+{
+	lithe,
+	normal,
+	strong,
+} TruckType;
+
 std::string operation_to_string(Operation o);
 std::string operation_to_svg(Operation o);
 

@@ -14,7 +14,6 @@
 
 #include "model/Operation.h"
 #include "model/Location.h"
-#include "model/OperationInfo.h"
 
 #include "common.h"
 
@@ -24,35 +23,68 @@
 
 #include "XmlObject.h"
 
-class Request;
+typedef int action_ptr;
+typedef int location;
 
-class Action : virtual public Location, public XmlObject, public OperationInfo
+class Action
 {
 public:
 	Action();
-	Action(const Location &l, const Operation &o, DumpsterSize in, DumpsterSize out);
+	Action(
+			Operation o_,
+			DumpsterSize insize_,
+			DumpsterSize outsize_,
+			sh_time_t min,
+			sh_time_t max,
+			sh_time_t time,
+			uint32_t max_dumpsters_,
+			uint32_t initial_inventory_[],
+			int location_);
 	~Action();
 
-	virtual sh_time_t get_time_taken(sh_time_t start_time, const Location &from) const;
-	bool follows_in_time(sh_time_t start_time, const Location &from) const;
+	DumpsterSize get_output_dumpster_size() const;
+	DumpsterSize get_input_dumpster_size() const;
+
+	sh_time_t get_minimum_time() const;
+	sh_time_t get_maximum_time() const;
+	sh_time_t get_wait_time() const;
+
+	Operation get_operation() const;
 
 	// rename this...
-	virtual int get_points() const;
-	virtual bool satisfies(const Request *request) const;
+	int get_points() const;
+
+	int get_index();
+	void set_index(int ndx);
+
+	location get_location();
 
 	friend std::ostream& operator<<(std::ostream& os, const Action& a);
 
-	virtual void loadXml(const tinyxml2::XMLElement* element);
-	virtual tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
+	void loadXml(const tinyxml2::XMLElement* element);
+	tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
+private:
+	Operation o;
 
-	virtual const Request *get_serviced_request() const;
+	DumpsterSize insize;
+	DumpsterSize outsize;
+
+	sh_time_t min_time;
+	sh_time_t max_time;
+
+	sh_time_t time_required;
+
+	uint32_t max_dumpsters;
+	uint32_t initial_inventory[4];
+
+	location loc;
+
+	int index;
 };
 
-typedef std::shared_ptr<const Action> action_ptr;
-
-action_ptr get_start_action();
+const Action* get_start_action();
 
 typedef std::map<const Operation, const Location> operation_location_constraint;
-bool satisfies_operation_constraint(const action_ptr &action, const operation_location_constraint& constraint);
+bool satisfies_operation_constraint(action_ptr action, const operation_location_constraint& constraint);
 
 #endif /* ACTION_H_ */

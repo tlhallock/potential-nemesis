@@ -8,6 +8,8 @@
 #ifndef OPERATIONINFO_H_
 #define OPERATIONINFO_H_
 
+#include "XmlObject.h"
+
 #include "model/Operation.h"
 #include <iostream>
 
@@ -18,17 +20,13 @@ public:
 	OperationInfo(Operation o, DumpsterSize in, DumpsterSize ou);
 	virtual ~OperationInfo();
 
-	DumpsterSize get_output_dumpster_size() const;
-	DumpsterSize get_input_dumpster_size() const;
-
-	Operation get_operation() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const OperationInfo& a);
-protected:
-	Operation o;
+	bool operator==(const OperationInfo& other);
 
-	DumpsterSize insize;
-	DumpsterSize outsize;
+	void loadXml(const tinyxml2::XMLElement* element);
+	tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
+protected:
 };
 
 std::string get_size_text(const OperationInfo &r);

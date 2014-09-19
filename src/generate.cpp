@@ -124,12 +124,16 @@ Request generate_request(const Parameters &p)
 
 	generate_times(o, start_time, stop_time);
 
-	return Request { generate_location(p),
-		o,
+	return Request {
+		generate_location(p),
+		OperationInfo
+		{
+			o,
+			gen_in_size(o),
+			gen_out_size(o)
+		},
 		start_time,
-		stop_time,
-		gen_in_size(o),
-		gen_out_size(o)};
+		stop_time};
 }
 
 std::vector<Request> generate_requests(const Parameters &p)

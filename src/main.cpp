@@ -31,6 +31,7 @@ void test_solver(Solver &&solver, const City &requests, bool best_of_many = true
 	{
 		sol.XmlRootObject::saveXml(stdout);
 		sol.XmlRootObject::saveXml("test_sol.xml");
+		std::cout << "Saving " << sol << std::endl;
 
 		Solution another {p.get_num_drivers()};
 		another.XmlRootObject::loadXml("test_sol.xml");
@@ -43,10 +44,9 @@ int main(int argc, char **argv)
 #if 0
 	Current and next things I am working on:
 		1. Finish writing the saveXml/loadXml
-			this means fixing the saveXml to write to an xml element
 			rename saveXml -> save_xml
+			combine everything under a single interface
 		2. Implement the maximum number of containers at each staging area
-		3. Make a different class for requests as actions (Request =/= Action)
 		4. Finish implementing the genetic algorithm
 			right now I am working on the breed function
 			Almost all the stubs are empty...
@@ -80,6 +80,7 @@ int main(int argc, char **argv)
 
 	City city = generate_city(p);
 	city.XmlRootObject::saveXml("city.xml");
+	city.XmlRootObject::saveXml(stdout);
 
 	svg_print_city("random", city, p);
 

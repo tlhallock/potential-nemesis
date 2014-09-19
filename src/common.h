@@ -30,6 +30,7 @@ typedef uint32_t sh_time_t;
 
 
 
+#include "logging.h"
 
 
 

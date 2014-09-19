@@ -9,7 +9,7 @@
 
 
 FillLand::FillLand(const Landfill& l, DumpsterSize size_) :
-	Action {l, Dump, size_, size_},
+	Action {l, OperationInfo {Dump, size_, size_}},
 	landfill_cost(l.get_wait_time()),
 	size(size_) {}
 

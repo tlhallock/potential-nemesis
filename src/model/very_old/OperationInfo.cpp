@@ -9,22 +9,30 @@
 
 #include <iomanip>
 
-OperationInfo::OperationInfo(): OperationInfo{Store, none, none} {}
-OperationInfo::OperationInfo(Operation o_, DumpsterSize in, DumpsterSize ou) :
-		o{o_},
-		insize{in},
-		outsize{ou} {}
+OperationInfo::OperationInfo() : OperationInfo{Store, none, none} {}
+OperationInfo::OperationInfo(
+		Operation o_,
+		DumpsterSize in, DumpsterSize out) :
+	o{o_},
+	insize{in}, outsize{out} {}
+
+#if 0
+OperationInfo::OperationInfo(const OperationInfo& other) :
+		o{other.o},
+		insize{other.insize},
+		outsize{other.outsize} {}
+#endif
 
 OperationInfo::~OperationInfo() {}
 
 DumpsterSize OperationInfo::get_output_dumpster_size() const
 {
-	return insize;
+	return outsize;
 }
 
 DumpsterSize OperationInfo::get_input_dumpster_size() const
 {
-	return outsize;
+	return insize;
 }
 
 
@@ -41,4 +49,9 @@ std::string get_size_text(const OperationInfo& a)
 std::ostream& operator<<(std::ostream& os, const OperationInfo& a)
 {
 	return os << " a='" << std::left << std::setw(10) << operation_to_string(a.o) << "' " << get_size_text(a);
+}
+
+bool OperationInfo::operator ==(const OperationInfo& other)
+{
+	return other.o == o && other.insize == insize && other.outsize == outsize;
 }
