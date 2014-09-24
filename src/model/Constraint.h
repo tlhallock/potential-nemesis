@@ -9,7 +9,12 @@
 #define CONSTRAINT_H_
 
 #include "model/Operation.h"
+#include "common.h"
+
 #include <set>
+#include <map>
+
+class Action;
 
 class LocationConstraint
 {
@@ -25,6 +30,7 @@ private:
 };
 
 typedef std::map<const Operation, const location> operation_location_constraint;
+
 bool satisfies_operation_constraint(const Action* action, const operation_location_constraint& constraint);
 
 #endif /* CONSTRAINT_H_ */

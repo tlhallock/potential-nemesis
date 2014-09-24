@@ -45,8 +45,10 @@ std::ostream& operator<<(std::ostream& os, const Action& a)
 			<< "][min=" << std::setw(5) << a.min_time
 			<< "][max=" << std::setw(5) << a.max_time
 			<< "][wait=" << std::setw(5) << a.time_required
-			<< "][max=" << std::setw(10) << a.max_dumpsters
-			<< "][loc=" << std::setw(5) << a.loc << "]";
+//			<< "][max=" << std::setw(10) << a.max_dumpsters
+			<< "][loc=" << std::setw(5) << a.loc << "]"
+			<< "][idx=" << std::setw(5) << a.index << "]"
+			;
 }
 
 
@@ -70,15 +72,6 @@ void Action::loadXml(const tinyxml2::XMLElement* action)
 		wait->QueryUnsignedAttribute("time", &time_required);
 	}
 
-	const tinyxml2::XMLElement* containers = action->FirstChildElement("containers");
-	if (containers == nullptr)
-	{
-		max_dumpsters = INT_MAX;
-	}
-	else
-	{
-		containers->QueryUnsignedAttribute("max", &max_dumpsters);
-	}
 
 
 	const char *op = action->Attribute("operation");
@@ -113,10 +106,6 @@ tinyxml2::XMLElement* Action::saveXml(tinyxml2::XMLElement* parent) const
 	tinyxml2::XMLElement* wait = parent->GetDocument()->NewElement("wait");
 	wait->SetAttribute("time", time_required);
 	action->InsertEndChild(wait);
-
-	tinyxml2::XMLElement* containers = parent->GetDocument()->NewElement("containers");
-	containers->SetAttribute("max", max_dumpsters);
-	action->InsertEndChild(containers);
 
 	action->SetAttribute("operation", operation_to_svg(o).c_str());
 	action->SetAttribute("in", size_to_string(insize).c_str());
@@ -178,7 +167,7 @@ Operation Action::get_operation() const
 
 
 int *initial_inventory = (int *) calloc (sizeof(*initial_inventory), 4);
-Action::Action() : Action {Store, none, none, 0, sh_time_look_ahead, 0, INT_MAX, initial_inventory, 0} {}
+Action::Action() : Action {Store, none, none, 0, sh_time_look_ahead, 0, 0} {}
 
 Action::Action(
 		Operation o_,
@@ -187,8 +176,6 @@ Action::Action(
 		sh_time_t min,
 		sh_time_t max,
 		sh_time_t time,
-		uint32_t max_dumpsters_,
-		uint32_t initial_inventory_[4],
 		location location_) :
 	o{o_},
 	insize{insize_},
@@ -196,13 +183,22 @@ Action::Action(
 	min_time {min},
 	max_time{max},
 	time_required{time},
-	max_dumpsters{max_dumpsters_},
-	//initial_inventory[4];
 	loc{location_},
-	index{0}
+	index{0} {}
+
+std::ostream &Action::save_to_matlab(std::ostream& out) const
 {
-	for(int i=0;i<4;i++)
-	{
-		initial_inventory[i] = initial_inventory_[i];
-	}
+	out << "stops(" << index << ") = struct( ";
+	out << "\"operation\", '" << operation_to_svg(o) << "', ";
+	out << "\"in_size\", '" << get_size_text(insize) << "', ";
+	out << "\"out_size\", '" << get_size_text(outsize) << "', ";
+	out << "\"min_time\", " << min_time << ", ";
+	out << "\"max_time\", " << max_time << ", ";
+	out << "\"time_required\", " << time_required << ", ";
+
+	out << "\"location\", " << loc;
+
+	out << ");" << std::endl;
+
+	return out;
 }

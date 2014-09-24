@@ -9,6 +9,8 @@
 
 #include "model/Rules.h"
 
+#include <algorithm>
+
 Solution::Solution(const City *city_) :
 	city(city_),
 	m_already_serviced{(bool *)calloc(city->get_num_stops(), sizeof(*m_already_serviced))}
@@ -100,9 +102,10 @@ const Route& Solution::get_route(int index) const
 
 Route& Solution::get_route(int index)
 {
-	if (index > routes.size())
+	if (index > (int) routes.size())
 	{
 		std::cout << "Trying to get a route that doesn't exist!" << std::endl;
+		exit(-1);
 	}
 
 	return routes.at(index);
@@ -186,7 +189,32 @@ bool Solution::service_next(int driver, const Action* action)
 	return true;
 }
 
-void Solution::validate(const City& city)
+void Solution::validate()
 {
-	// Verify that each request is in the city
+	if (city->get_num_trucks() != (int) routes.size())
+	{
+		std::cout << "Not the right number of trucks!" << std::endl;
+	}
+
+	int num_actions = city->get_num_stops();
+
+	Solution tst {city};
+	for (int route = 0; route < (int) routes.size(); route++)
+	{
+		Route& r = routes.at(route);
+
+		// starting at 1 to skip the start location...
+		for (int stop = 1; stop < r.get_num_actions(); stop++)
+		{
+			int ndx = r.requests.at(stop);
+			if (ndx < 0 || ndx >= num_actions)
+			{
+				std::cout << "Invalid index at route " << route << " stop " << stop << " ndx = " << ndx << std::endl;
+				exit(-1);
+			}
+			tst.service_next(route, city->get_stop(ndx));
+		}
+	}
+
+	std::cout << "The city is good!" << std::endl;
 }

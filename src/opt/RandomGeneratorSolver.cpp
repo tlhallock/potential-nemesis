@@ -24,6 +24,7 @@ bool RandomGeneratorSolver::get_next_request(
 		int driver)
 {
 	Route& output = s->get_route(driver);
+
 	std::vector<const Action*> *possibles = get_possibles(
 			s,
 			output.get_time_to_end(),

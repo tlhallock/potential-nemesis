@@ -8,6 +8,9 @@
 #ifndef INVENTORY_H_
 #define INVENTORY_H_
 
+#include "model/Operation.h"
+#include "common.h"
+
 #include <map>
 
 class Inventory

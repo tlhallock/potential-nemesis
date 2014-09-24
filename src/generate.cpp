@@ -132,7 +132,7 @@ void generate_requests(const Parameters &p, City *city)
 		uint32_t inventory[4];
 		inventory[0] = inventory[1] = inventory[2] = inventory[3] = 0;
 
-		city->add_stop(new Action
+		city->add_request(new Action
 		{
 			o,
 			gen_in_size(o),
@@ -140,8 +140,6 @@ void generate_requests(const Parameters &p, City *city)
 			start_time,
 			stop_time,
 			TIME_AT_HOUSE,
-			1,
-			&inventory[0],
 			l
 		});
 	}
@@ -149,69 +147,25 @@ void generate_requests(const Parameters &p, City *city)
 
 void generate_landfills(const Parameters &p, City* city)
 {
-	DumpsterSize sizes[] = {smallest, small, big, biggest};
 	// only good for now...
 	uint32_t inventory[4];
 	inventory[0] = inventory[1] = inventory[2] = inventory[3] = 0;
-
 	for (int i = 0; i < p.num_random_land_fills(); i++)
 	{
-		location l = city->add_location(generate_location(p));
-		for (int j = 0; j < 4; j++)
-		{
-			city->add_stop(new Action
-			{
-				Dump,
-				sizes[j],
-				sizes[j],
-				0,
-				sh_time_look_ahead,
-				LANDFILL_TIME,
-				0,
-				&inventory[0],
-				l
-			});
-		}
+		city->add_land_fill(generate_location(p));
 	}
 }
 
 void generate_staging_areas(const Parameters &p, City* city)
 {
-	DumpsterSize sizes[] = {smallest, small, big, biggest};
 	// only good for now...
-	uint32_t inventory[4];
-	inventory[0] = inventory[1] = inventory[2] = inventory[3] = 0;
+	int inventory[4];
+	inventory[0] = inventory[1] = inventory[2] = inventory[3] = 5;
 
 	for (int i = 0; i < p.num_random_staging_areas(); i++)
 	{
-		location l = city->add_location(generate_location(p));
-		for (int j = 0; j < 4; j++)
-		{
-			city->add_stop(new Action
-			{
-				Store,
-				sizes[j],
-				none,
-				0,
-				sh_time_look_ahead,
-				STAGE_TIME,
-				0,
-				&inventory[0],
-				l
-			});
-			city->add_stop(new Action
-			{
-				UnStore,
-				none,
-				sizes[j],
-				0,
-				sh_time_look_ahead,
-				STAGE_TIME,
-				0,
-				&inventory[0],
-				l
-			});
-		}
+		city->add_staging_area(generate_location(p), &inventory[0], INT_MAX);
+
 	}
 }
 

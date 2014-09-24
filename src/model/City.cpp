@@ -13,8 +13,16 @@
 
 #include <fstream>
 
-City::City() : start_action {new Action} { all_actions.push_back(start_action); }
-City::~City() {}
+City::City() :
+	start_action {new Action},
+	distances{(double *) malloc (sizeof (*distances))}
+{
+	all_actions.push_back(start_action);
+}
+City::~City()
+{
+	free(distances);
+}
 
 int City::get_num_stops() const
 {
@@ -28,7 +36,29 @@ const Action* City::get_stop(int index) const
 
 sh_time_t City::get_time_from(location i, location j) const
 {
-	return all_locations.at(i).get_time_to(all_locations.at(j));
+	return distances[i * all_locations.size() + j];
+}
+
+std::ostream& City::save_to_matlab(std::ostream& out) const
+{
+	for_each(all_actions.begin(), all_actions.end(), [&out](const Action *a){ a->save_to_matlab(out); });
+	return out;
+}
+
+void City::refresh_distances()
+{
+	free(distances);
+
+	int num = all_locations.size();
+	distances = (double *) malloc(sizeof(*distances) * num * num);
+
+	for (int i = 0; i < num; i++)
+	{
+		for (int j = 0; j < num; j++)
+		{
+			distances[i * num + j] = all_locations.at(i).get_time_to(all_locations.at(j));
+		}
+	}
 }
 
 void City::add_stop(Action* action)
@@ -47,6 +77,61 @@ int City::get_start_location(int driver) const
 	return 0;
 }
 
+void City::add_staging_area(Location loc, int* inventories, int capacity)
+{
+	DumpsterSize sizes[] = {smallest, small, big, biggest};
+	location l = add_location(loc);
+	for (int j = 0; j < 4; j++)
+	{
+		add_stop(new Action
+		{
+			Store,
+			sizes[j],
+			none,
+			0,
+			sh_time_look_ahead,
+			STAGE_TIME,
+			l
+		});
+		add_stop(new Action
+		{
+			UnStore,
+			none,
+			sizes[j],
+			0,
+			sh_time_look_ahead,
+			STAGE_TIME,
+			l
+		});
+	}
+
+	staging_areas.insert(std::pair<int, StagingArea>{l, StagingArea{l, capacity, inventories}});
+}
+
+void City::add_land_fill(Location loc)
+{
+	DumpsterSize sizes[] = {smallest, small, big, biggest};
+	location l = add_location(loc);
+	for (int j = 0; j < 4; j++)
+	{
+		add_stop(new Action
+		{
+			Dump,
+			sizes[j],
+			sizes[j],
+			0,
+			sh_time_look_ahead,
+			LANDFILL_TIME,
+			l
+		});
+	}
+}
+
+void City::add_request(Action* action)
+{
+	add_stop(action);
+}
+
 const Location& City::get_location(location l) const
 {
 	return all_locations.at(l);
@@ -54,7 +139,16 @@ const Location& City::get_location(location l) const
 
 location City::add_location(const Location& l)
 {
+	for (int i = 0; i < (int) all_locations.size(); i++)
+	{
+		if (all_locations.at(i) == l)
+		{
+			return i;
+		}
+	}
+
 	all_locations.push_back(l);
+	refresh_distances();
 	return all_locations.size() - 1;
 }
 
@@ -101,11 +195,21 @@ void City::loadXml(const tinyxml2::XMLDocument *document)
 		exit(-1);
 	}
 
+	std::for_each(all_actions.begin(), all_actions.end(), [](const Action* action) { delete action; });
+
+	all_actions.clear();
+	all_locations.clear();
+	truck_types.clear();
+	staging_areas.clear();
+
+	int ndx=0;
 	const tinyxml2::XMLElement* actions = element->FirstChildElement("actions")->FirstChildElement("action");
 	while (actions != nullptr)
 	{
 		Action *action = new Action;
 		action->loadXml(actions);
+		action->set_index(ndx++);
+		all_actions.push_back(action);
 
 		actions = actions->NextSiblingElement();
 	}
@@ -126,6 +230,19 @@ void City::loadXml(const tinyxml2::XMLDocument *document)
 
 		locs = locs->NextSiblingElement();
 	}
+
+
+	const tinyxml2::XMLElement* yards = element->FirstChildElement("yards")->FirstChildElement("yard");
+	while (yards != nullptr)
+	{
+		StagingArea a;
+		a.loadXml(yards);
+		staging_areas.insert(std::pair<int, StagingArea> {a.get_location(), a});
+
+		yards = yards->NextSiblingElement();
+	}
+
+	refresh_distances();
 }
 
 tinyxml2::XMLElement* City::saveXml(tinyxml2::XMLDocument *document) const
@@ -155,6 +272,16 @@ tinyxml2::XMLElement* City::saveXml(tinyxml2::XMLDocument *document) const
 		loc.saveXml(locs)->SetAttribute("idx", i);
 	}
 	city->InsertEndChild(locs);
+
+
+	tinyxml2::XMLElement* yards = document->NewElement("yards");
+
+	auto end = staging_areas.end();
+	for (auto it = staging_areas.begin(); it != end; ++it)
+	{
+		it->second.saveXml(yards);
+	}
+	city->InsertEndChild(yards);
 
 
 	document->InsertEndChild(city);

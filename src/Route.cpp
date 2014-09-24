@@ -53,7 +53,7 @@ int Route::get_num_actions() const
 
 const Action* Route::get_action(int index) const
 {
-	if (index > requests.size())
+	if (index > (int) requests.size())
 	{
 		std::cout << "trying to get a action that is not in this route!" << std::endl;
 		exit(-1);

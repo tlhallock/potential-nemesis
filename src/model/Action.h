@@ -23,8 +23,6 @@
 
 #include "XmlObject.h"
 
-typedef uint32_t location;
-
 class Action
 {
 public:
@@ -36,8 +34,6 @@ public:
 			sh_time_t min,
 			sh_time_t max,
 			sh_time_t time,
-			uint32_t max_dumpsters_,
-			uint32_t *initial_inventory_,
 			location location_);
 	~Action();
 
@@ -62,6 +58,8 @@ public:
 
 	void loadXml(const tinyxml2::XMLElement* element);
 	tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
+
+	std::ostream &save_to_matlab(std::ostream &out) const;
 private:
 	Operation o;
 
@@ -72,9 +70,6 @@ private:
 	sh_time_t max_time;
 
 	sh_time_t time_required;
-
-	uint32_t max_dumpsters;
-	uint32_t initial_inventory[4];
 
 	location loc;
 

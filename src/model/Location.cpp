@@ -73,7 +73,7 @@ std::string Location::serialize() const
 
 void Location::loadXml(const tinyxml2::XMLElement* element)
 {
-	const tinyxml2::XMLElement* loc = element->FirstChildElement("location");
+	const tinyxml2::XMLElement* loc = element; // element->FirstChildElement("location");
 	if (loc == nullptr)
 	{
 		std::cout << "Error parsing location: no location!" << std::endl;

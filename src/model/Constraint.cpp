@@ -5,7 +5,8 @@
  *      Author: thallock
  */
 
-#include <model/Constraint.h>
+#include "model/Constraint.h"
+#include "model/Action.h"
 
 LocationConstraint::LocationConstraint(location l_) : l(l_) {}
 LocationConstraint::~LocationConstraint() {}

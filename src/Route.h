@@ -45,6 +45,7 @@ public:
 private:
 	void service_next(const Action* req);
 	sh_time_t get_time_to(const int i) const;
+	bool verify_indices() const;
 
 	const City* city;
 	int driver;

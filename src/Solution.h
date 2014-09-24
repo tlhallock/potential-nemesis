@@ -38,7 +38,7 @@ public:
 	void loadXml(const tinyxml2::XMLDocument* document);
 	tinyxml2::XMLElement* saveXml(tinyxml2::XMLDocument* document) const;
 
-	void validate(const City& city);
+	void validate();
 private:
 	const City* city;
 	std::vector<Route> routes;

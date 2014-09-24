@@ -9,6 +9,7 @@
 #define NEARESTPOINTSOLVER_H_
 
 #include "opt/ForDriverForStopSolver.h"
+#include "model/Constraint.h"
 
 #include <map>
 

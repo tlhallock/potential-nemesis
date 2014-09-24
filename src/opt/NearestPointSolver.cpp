@@ -70,7 +70,8 @@ bool NearestPointSolver::get_next_request(
 				best->actions, best->time_taken,
 				get_constraints(city, driver));
 
-		if (best->time_taken == sh_time_max)
+		if (best->time_taken == sh_time_max
+			|| best->actions.size() == 0)
 		{
 			delete best;
 			continue;
@@ -90,6 +91,7 @@ bool NearestPointSolver::get_next_request(
 	});
 
 	TimeTo *best = times.at(random_decreasing_probability(times.size()));
+
 	for (int i = 0; i < (int) best->actions.size(); i++)
 	{
 		s->service_next(driver, best->actions.at(i));

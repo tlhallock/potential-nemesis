@@ -12,12 +12,12 @@ Parameters::~Parameters() {}
 
 int Parameters::get_num_drivers() const
 {
-	return 3;
+	return 3; // 10
 }
 
 int Parameters::num_random_requests() const
 {
-	return 20;
+	return 20; // 70
 }
 
 int Parameters::num_random_land_fills() const

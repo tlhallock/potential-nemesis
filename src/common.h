@@ -30,6 +30,8 @@ typedef uint32_t sh_time_t;
 #define CANT_HIT_TOO_EARLY 0
 
 
+typedef int location;
+
 
 
 

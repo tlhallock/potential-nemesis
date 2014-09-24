@@ -10,6 +10,9 @@
 
 #include "model/City.h"
 #include "Solution.h"
+
+#include "model/Constraint.h"
+
 #include <vector>
 
 
