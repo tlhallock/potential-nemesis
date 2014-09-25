@@ -9,7 +9,7 @@
 #include "Solution.h"
 #include "Parameters.h"
 
-void verify()
+bool verify()
 {
 	Parameters p;
 	City *city = new City;
@@ -23,5 +23,7 @@ void verify()
 	solution->validate();
 	solution->XmlRootObject::loadXml("output/sol.best_of_many[spoke].xml");
 	solution->validate();
+
+	return true;
 }
 

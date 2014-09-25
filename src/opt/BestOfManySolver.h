@@ -14,7 +14,7 @@ class BestOfManySolver : public Solver
 {
 public:
 	BestOfManySolver(Solver *delegate, int max_iters);
-	virtual ~BestOfManySolver();
+	~BestOfManySolver();
 
 	Solution solve(const City &city);
 	std::string get_name() const;

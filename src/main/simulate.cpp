@@ -42,7 +42,7 @@ void test_solver(Solver &&solver, const City *requests, bool best_of_many = true
 
 
 
-void simulate()
+bool simulate()
 {
 	int num_to_try = 100;
 
@@ -50,13 +50,10 @@ void simulate()
 	City *city = new City;
 	city->XmlRootObject::loadXml("output/city.xml");
 
-
-	city->XmlRootObject::saveXml("output/mytest.xml");
-
-	test_solver(BestOfManySolver { new RandomGeneratorSolver {p}, num_to_try }, city);
+//	test_solver(BestOfManySolver { new RandomGeneratorSolver {p}, num_to_try }, city);
 
 	test_solver(BestOfManySolver { new NearestPointSolver {p},    num_to_try }, city);
-	test_solver(BestOfManySolver { new SpokeSolver {p},           num_to_try }, city);
+//	test_solver(BestOfManySolver { new SpokeSolver {p},           num_to_try }, city);
 
 	// Right now, these should be about equivalent because the genetic solver doesn't have any breeding/mutation
 //	test_solver(GeneticSolver {p, num_to_try, new RandomGeneratorSolver {p}, 50, new SubcycleBreeder{}}, city, false);
@@ -64,5 +61,7 @@ void simulate()
 //	test_solver(GeneticSolver {p, num_to_try, new SpokeSolver {p}},           city, false);
 
 //	std::cout << "total=" << city.get_num_requests() << std::endl;
+
+	return true;
 
 }

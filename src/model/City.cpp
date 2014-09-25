@@ -13,15 +13,23 @@
 
 #include <fstream>
 
+namespace
+{
+	IntermediateAction empty_intermediate{-13};
+}
+
 City::City() :
 	start_action {new Action},
-	distances{(double *) malloc (sizeof (*distances))}
+	distances{(double *) malloc (sizeof (*distances))},
+	intermediate_actions{nullptr}
 {
-	all_actions.push_back(start_action);
+	add_location(Location{});
+	start_action->set_index(START_INDEX);
 }
 City::~City()
 {
 	free(distances);
+	free(intermediate_actions);
 }
 
 int City::get_num_stops() const
@@ -31,6 +39,11 @@ int City::get_num_stops() const
 
 const Action* City::get_stop(int index) const
 {
+	if (index == START_INDEX)
+	{
+		return start_action;
+	}
+
 	return all_actions.at(index);
 }
 
@@ -61,6 +74,100 @@ void City::refresh_distances()
 	}
 }
 
+const std::map<const int, const StagingArea>& City::get_staging_areas() const
+{
+	return staging_areas;
+}
+
+void City::refresh_intermediates() const
+{
+	if (intermediate_actions != nullptr)
+	{
+		return;
+	}
+
+	int size = all_actions.size();
+	intermediate_actions = (IntermediateAction **) calloc (size * size, sizeof (*intermediate_actions));
+
+	request_indices.clear();
+
+	Operation o;
+
+	std::cout << "Creating intermediates..." << std::endl;
+	int total_paths = 0;
+
+	for (int i=0; i<size; i++)
+	{
+		o = all_actions.at(i)->get_operation();
+		if (o == Store || o == UnStore || o == Dump)
+		{
+			continue;
+		}
+		request_indices.push_back(i);
+
+		for (int j=0;j<size;j++)
+		{
+			if (i == j)
+			{
+				continue;
+			}
+			o = all_actions.at(j)->get_operation();
+			if (o == Store || o == UnStore || o == Dump)
+			{
+				continue;
+			}
+
+			IntermediateAction *inter = create_intermediate_action(all_actions, i, j);
+
+			total_paths += inter->get_num_paths();
+			intermediate_actions[i * size + j] = inter;
+		}
+	}
+
+	std::cout << "Done. # intermediates = " << total_paths << std::endl;
+}
+
+const std::vector<int>& City::get_requests() const
+{
+	refresh_intermediates();
+
+#if 0
+	for (auto it = request_indices.begin(); it != request_indices.end(); ++it)
+	{
+		int to = *it;
+		if (get_stop(to)->get_operation() == Store
+				|| get_stop(to)->get_operation() == UnStore
+				|| get_stop(to)->get_operation() == Dump)
+		{
+			std::cout << "Error" << get_stop(to)->get_operation() << std::endl;
+			die();
+		}
+	}
+#endif
+
+	return request_indices;
+}
+
+const IntermediateAction* City::get_intermediates(int i, int j) const
+{
+	refresh_intermediates();
+	return intermediate_actions[i * all_actions.size() + j];
+}
+
+void City::clear_intermediates() const
+{
+	if (intermediate_actions == nullptr)
+	{
+		return;
+	}
+	int num = all_actions.size();
+	for (int i=0; i<num * num;i++)
+	{
+		delete intermediate_actions[i];
+	}
+	free(intermediate_actions);
+}
+
 void City::add_stop(Action* action)
 {
 	action->set_index(all_actions.size());
@@ -72,13 +179,15 @@ const std::vector<const Action*>& City::get_all_stops() const
 	return all_actions;
 }
 
-int City::get_start_location(int driver) const
+const Action* City::get_start_action(int driver) const
 {
-	return 0;
+	return start_action;
 }
 
 void City::add_staging_area(Location loc, int* inventories, int capacity)
 {
+	clear_intermediates();
+
 	DumpsterSize sizes[] = {smallest, small, big, biggest};
 	location l = add_location(loc);
 	for (int j = 0; j < 4; j++)
@@ -110,6 +219,8 @@ void City::add_staging_area(Location loc, int* inventories, int capacity)
 
 void City::add_land_fill(Location loc)
 {
+	clear_intermediates();
+
 	DumpsterSize sizes[] = {smallest, small, big, biggest};
 	location l = add_location(loc);
 	for (int j = 0; j < 4; j++)
@@ -129,6 +240,8 @@ void City::add_land_fill(Location loc)
 
 void City::add_request(Action* action)
 {
+	clear_intermediates();
+
 	add_stop(action);
 }
 
@@ -192,10 +305,12 @@ void City::loadXml(const tinyxml2::XMLDocument *document)
 	if (element == nullptr)
 	{
 		std::cout << "No city found!" << std::endl;
-		exit(-1);
+		die();
 	}
 
 	std::for_each(all_actions.begin(), all_actions.end(), [](const Action* action) { delete action; });
+
+	clear_intermediates();
 
 	all_actions.clear();
 	all_locations.clear();
@@ -288,9 +403,209 @@ tinyxml2::XMLElement* City::saveXml(tinyxml2::XMLDocument *document) const
 	return city;
 }
 
-int City::get_start_action(int driver) const
+IntermediateAction::IntermediateAction(int dest_) : dest{dest_} {}
+IntermediateAction::~IntermediateAction() {}
+
+void IntermediateAction::add_alternative(const std::vector<int>& path)
 {
-	return 0;
+	if (path.back() != dest)
+	{
+		std::cout << "This is supposed to get us there!" << std::endl;
+		die();
+	}
+	alternatives.push_back(path);
+}
+
+IntermediateAction *create_intermediate_action(const std::vector<const Action*>& all, int from, int to)
+{
+	IntermediateAction *ret_val = new IntermediateAction {to};
+
+	Operation prevO = all.at(from)->get_operation();
+	Operation nextO = all.at(to)->get_operation();
+
+	DumpsterSize prevS = all.at(from)->get_output_dumpster_size();
+	DumpsterSize nextS = all.at(to)->get_input_dumpster_size();
+
+	if (prevO == PickUp || prevO == Replace)
+	{
+		if (nextO == PickUp)
+		{
+			// dump -> stage -> to
+			auto end = all.end();
+			for (auto it = all.begin(); it != end; ++it)
+			{
+				const Action* action = *it;
+				if (action->get_operation() != Dump)
+				{
+					continue;
+				}
+
+				if (action->get_input_dumpster_size() != prevS)
+				{
+					continue;
+				}
+
+				auto iend = all.end();
+				for (auto iit = all.begin(); iit != iend; ++iit)
+				{
+					const Action* action2 = *iit;
+					if (action2->get_operation() != Store)
+					{
+						continue;
+					}
+					if (action2->get_input_dumpster_size() != prevS)
+					{
+						continue;
+					}
+
+					std::vector<int> alt;
+					alt.push_back(action->get_index());
+					alt.push_back(action2->get_index());
+					alt.push_back(to);
+					ret_val->add_alternative(alt);
+				}
+			}
+		}
+		else if (nextO == DropOff || nextO == Replace)
+		{
+			if (prevS == nextS)
+			{
+				// dump
+				auto end = all.end();
+				for (auto it = all.begin(); it != end; ++it)
+				{
+					const Action* action = *it;
+					if (action->get_operation() != Dump)
+					{
+						continue;
+					}
+					if (action->get_output_dumpster_size() != nextS)
+					{
+						continue;
+					}
+
+					std::vector<int> alt;
+					alt.push_back(action->get_index());
+					alt.push_back(to);
+					ret_val->add_alternative(alt);
+				}
+			}
+			else
+			{
+				// dump -> stage -> unstage
+				auto end = all.end();
+				for (auto it = all.begin(); it != end; ++it)
+				{
+					const Action* action = *it;
+					if (action->get_operation() != Dump)
+					{
+						continue;
+					}
+
+					if (action->get_input_dumpster_size() != prevS)
+					{
+						continue;
+					}
+
+					auto iend = all.end();
+					for (auto iit = all.begin(); iit != iend; ++iit)
+					{
+						const Action* action2 = *iit;
+						if (action2->get_operation() != Store)
+						{
+							continue;
+						}
+						if (action2->get_input_dumpster_size() != prevS)
+						{
+							continue;
+						}
+
+						auto iiend = all.end();
+						for (auto iiit = all.begin(); iiit != iiend; ++iiit)
+						{
+							const Action* action3 = *iiit;
+							if (action3->get_operation() != UnStore)
+							{
+								continue;
+							}
+							if (action3->get_output_dumpster_size() != nextS)
+							{
+								continue;
+							}
+
+							std::vector<int> alt;
+							alt.push_back(action->get_index());
+							alt.push_back(action2->get_index());
+							alt.push_back(action3->get_index());
+							alt.push_back(to);
+							ret_val->add_alternative(alt);
+						}
+					}
+				}
+			}
+		}
+	}
+	else if (prevO == DropOff)
+	{
+		if (nextO == PickUp)
+		{
+			// to
+			std::vector<int> alt;
+			alt.push_back(to);
+			ret_val->add_alternative(alt);
+		}
+		else if (nextO == DropOff || nextO == Replace)
+		{
+			// unstore -> to
+			auto end = all.end();
+			for (auto it = all.begin(); it != end; ++it)
+			{
+				const Action* action = *it;
+				if (action->get_operation() != UnStore)
+				{
+					continue;
+				}
+				if (action->get_input_dumpster_size() != prevS)
+				{
+					continue;
+				}
+
+				std::vector<int> alt;
+				alt.push_back(action->get_index());
+				alt.push_back(to);
+				ret_val->add_alternative(alt);
+			}
+		}
+	}
+
+	return ret_val;
+}
+
+std::ostream& operator<<(std::ostream& os, const IntermediateAction& action)
+{
+	auto end = action.alternatives.end();
+	for (auto it = action.alternatives.begin(); it != end; ++it)
+	{
+		auto iend = it->end();
+		for (auto iit = it->begin(); iit != iend; ++iit)
+		{
+			os << *iit << " ";
+		}
+		os << std::endl;
+	}
+	os << "\n\n\n\n\n" << std::endl;
+
+	return os;
+}
+
+int IntermediateAction::get_num_paths() const
+{
+	return alternatives.size();
+}
+
+const std::vector<std::vector<int> >& IntermediateAction::get_alternatives() const
+{
+	return alternatives;
 }
 
 #if 0

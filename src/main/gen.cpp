@@ -23,7 +23,7 @@
 
 #include <unistd.h>
 
-void generate()
+bool generate()
 {
 	Parameters p;
 	City *city = generate_city(p);
@@ -36,4 +36,6 @@ void generate()
 
 	std::ofstream log { "output/requests.txt" };
 	log << city << std::endl;
+
+	return true;
 }

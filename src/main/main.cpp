@@ -4,9 +4,17 @@
 #include <time.h>
 
 
-void generate();
-void simulate();
-void verify();
+bool generate();
+bool simulate();
+bool verify();
+
+#include <iostream>
+
+void die()
+{
+	std::cout << "death to us all!" << std::endl;
+	exit(-1);
+}
 
 int main(int argc, char **argv)
 {
@@ -43,13 +51,12 @@ int main(int argc, char **argv)
 		13. Add constraints to each request on which driver they can be attended by.
 #endif
 
-	srand(time(NULL));
-	//srand(5000013);
+//	srand(time(NULL));
+	srand(5000013);
 
-	generate();
-	simulate();
-	verify();
-
-	return 0;
+	return
+		generate()
+		&& simulate()
+		&& verify();
 }
 

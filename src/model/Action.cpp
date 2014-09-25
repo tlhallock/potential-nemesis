@@ -46,7 +46,7 @@ std::ostream& operator<<(std::ostream& os, const Action& a)
 			<< "][max=" << std::setw(5) << a.max_time
 			<< "][wait=" << std::setw(5) << a.time_required
 //			<< "][max=" << std::setw(10) << a.max_dumpsters
-			<< "][loc=" << std::setw(5) << a.loc << "]"
+			<< "][loc=" << std::setw(5) << a.loc
 			<< "][idx=" << std::setw(5) << a.index << "]"
 			;
 }
@@ -59,7 +59,7 @@ void Action::loadXml(const tinyxml2::XMLElement* action)
 	if (loc < 0)
 	{
 		std::cout << "Error while loading action: no location!" << std::endl;
-		exit(-1);
+		die();
 	}
 
 	const tinyxml2::XMLElement* wait = action->FirstChildElement("wait");
@@ -78,7 +78,7 @@ void Action::loadXml(const tinyxml2::XMLElement* action)
 	if (op == nullptr)
 	{
 		std::cout << "No operation for OperationInfo!!!!" << std::endl;
-		exit(-1);
+		die();
 	}
 	o = char_to_operation(*op);
 	insize = string_to_size(action->Attribute("in"));

@@ -13,6 +13,28 @@
 
 #include "XmlObject.h"
 
+#define START_INDEX (-1)
+
+
+
+class IntermediateAction
+{
+public:
+	IntermediateAction(int dest);
+	~IntermediateAction();
+
+	void add_alternative(const std::vector<int>& path);
+	int get_num_paths() const;
+
+	const std::vector<std::vector<int>>& get_alternatives() const;
+
+	friend std::ostream& operator<<(std::ostream& os, const IntermediateAction& action);
+private:
+	int dest;
+	std::vector<std::vector<int>> alternatives;
+};
+IntermediateAction *create_intermediate_action(const std::vector<const Action*>& all, int from, int to);
+
 
 class City : public XmlRootObject
 {
@@ -40,25 +62,37 @@ public:
 	// Trucks
 	int get_num_trucks() const;
 	void add_truck(TruckType truck_type);
-	location get_start_location(int driver) const;
-	int get_start_action(int driver) const;
+	const Action* get_start_action(int driver) const;
 
 	// Location
 	sh_time_t get_time_from(location i, location j) const;
 	const Location& get_location(location l) const;
 
 	// Staging areas
+	const std::map<const int, const StagingArea>& get_staging_areas() const;
+
+	// Reduced
+	const std::vector<int>& get_requests() const;
+	const IntermediateAction* get_intermediates(int i, int j) const;
 private:
 	void refresh_distances();
+	void clear_intermediates() const;
+	void refresh_intermediates() const;
 	void add_stop(Action *action);
 
 	std::vector<const Action *> all_actions;
 	std::vector<Location> all_locations;
 	std::vector<TruckType> truck_types;
-	std::map<int, StagingArea> staging_areas;
+	std::map<const int, const StagingArea> staging_areas;
 
-	const Action* start_action;
+	Action* start_action;
+
+	// cached entries
 	double *distances;
+	mutable std::vector<int> request_indices;
+	mutable IntermediateAction **intermediate_actions;
+	// not used yet...
+	mutable sh_time_t *minimum_times;
 };
 
 #endif /* CITY_H_ */

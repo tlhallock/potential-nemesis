@@ -37,6 +37,7 @@ Solution BestOfManySolver::solve(const City &city)
 		}
 
 		Solution next = delegate->solve(city);
+
 		Cost another {next};
 
 		if (!(another < cost))
@@ -47,6 +48,7 @@ Solution BestOfManySolver::solve(const City &city)
 		s = next;
 		cost = another;
 
+		std::cout << "improved at count = " << count << std::endl;
 		count = 0;
 	}
 

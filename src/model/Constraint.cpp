@@ -36,3 +36,6 @@ bool LocationConstraint::permits(TruckType type) const
 {
 	return types.find(type) != types.end();
 }
+
+Constraint::Constraint() {}
+Constraint::~Constraint() {}

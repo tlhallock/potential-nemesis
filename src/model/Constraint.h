@@ -16,6 +16,19 @@
 
 class Action;
 
+
+class Constraint
+{
+public:
+	Constraint();
+	virtual ~Constraint();
+	virtual bool permissable(TruckType t, const Action* action) const = 0;
+};
+
+
+
+
+
 class LocationConstraint
 {
 	LocationConstraint(location l);

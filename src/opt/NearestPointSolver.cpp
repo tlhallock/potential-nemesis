@@ -17,11 +17,11 @@ namespace
 	class TimeTo
 	{
 	public:
-		TimeTo () {}
+		TimeTo () : time_taken{sh_time_max} {}
 		~TimeTo() {}
 
 		sh_time_t time_taken;
-		std::vector<const Action*> actions;
+		std::vector<int> actions;
 
 		bool operator<(const TimeTo &other) const
 		{
@@ -40,41 +40,34 @@ bool NearestPointSolver::get_next_request(
 {
 	std::vector<TimeTo*> times;
 
-	Route& route = s->get_route(driver);
 
-	sh_time_t start_time = route.get_time_to_end();
-	const Action* prev_action = route.get_last_action();
+	const std::vector<int>& requests = city.get_requests();
 
-	int num_stops = city.get_num_stops();
+	int num_stops = requests.size();
 	for (int i = 0; i < num_stops; i++)
 	{
-		const Action* next_action = city.get_stop(i);
-		if (is_possible(&city, s, start_time, prev_action, next_action))
-		{
-			if (!satisfies_operation_constraint(next_action, get_constraints(city, driver)))
-			{
-				continue;
-			}
-
-			TimeTo *best = new TimeTo;
-			best->time_taken = start_time;
-			best->actions.push_back(next_action);
-			times.push_back(best);
-			continue;
-		}
-
 		TimeTo *best = new TimeTo;
+		int to = requests.at(i);
 
-		get_necessary_actions(city, s, start_time,
-				prev_action, next_action,
-				best->actions, best->time_taken,
-				get_constraints(city, driver));
+		get_best_intermediate(
+				city,
+				s,
+				driver,
+				to,
+				get_constraints(city, driver),
+				best->actions,
+				best->time_taken);
 
-		if (best->time_taken == sh_time_max
-			|| best->actions.size() == 0)
+		if (best->time_taken == sh_time_max || best->actions.size() == 0)
 		{
 			delete best;
 			continue;
+		}
+
+		if (best->actions.back() != to)
+		{
+			std::cout << "Supposed to get us to " << to << std::endl;
+			die();
 		}
 
 		times.push_back(best);
@@ -94,7 +87,7 @@ bool NearestPointSolver::get_next_request(
 
 	for (int i = 0; i < (int) best->actions.size(); i++)
 	{
-		s->service_next(driver, best->actions.at(i));
+		s->service_next(driver, city.get_stop(best->actions.at(i)));
 	}
 
 	std::for_each(times.begin(), times.end(), [](const TimeTo * const i) { delete i; });

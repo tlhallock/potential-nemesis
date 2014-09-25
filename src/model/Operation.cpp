@@ -7,6 +7,8 @@
 
 #include "model/Operation.h"
 
+#include "common.h"
+
 #include <iostream>
 
 #include <string.h>
@@ -29,7 +31,7 @@ std::string operation_to_string(Operation a)
 			return "Replace full dumpster with empty one ";
 		default:
 			std::cout << "Uh Oh!!!! 45234523542435" << std::endl;
-			exit(-1);
+			die();
 			return "Uknown";
 	}
 }
@@ -52,7 +54,7 @@ std::string operation_to_svg(Operation o)
 			return "R";
 		default:
 			std::cout << "Uh Oh!!!! a62562362346fgagasdg" << std::endl;
-			exit(-1);
+			die();
 			return "?";
 	}
 }
@@ -75,7 +77,7 @@ Operation char_to_operation(char c)
 			return Replace;
 		default:
 			std::cout << "Uh Oh!!!! agdasdgadsg" << std::endl;
-			exit(-1);
+			die();
 			return Store;
 	}
 }
@@ -96,8 +98,9 @@ std::string size_to_string(DumpsterSize size)
 			return "none";
 		default:
 			std::cout << "Unknown dumpster size!" << std::cout;
-			exit(-1);
+			die();
 	}
+	return "unknown";
 }
 
 DumpsterSize string_to_size(const char* str)
@@ -105,7 +108,7 @@ DumpsterSize string_to_size(const char* str)
 	if (str == nullptr)
 	{
 		std::cout << "Null in dumpster size!!!!" << std::endl;
-		exit(-1);
+		die();
 	}
 	else if (strcmp(str, "smallest") == 0)
 	{
@@ -130,7 +133,8 @@ DumpsterSize string_to_size(const char* str)
 	else
 	{
 		std::cout << "Unknown dumpster size string: " << str << std::endl;
-		exit(-1);
+		die();
+		return smallest;
 	}
 }
 
@@ -166,7 +170,7 @@ int get_points(Operation operation)
 			return 2;
 		default:
 			std::cout << "Uh Oh!!!! fdsfdlkjafd" << std::endl;
-			exit(-1);
+			die();
 			return -1;
 	}
 }

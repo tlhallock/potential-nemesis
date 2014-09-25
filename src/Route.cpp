@@ -17,7 +17,7 @@ Route::Route(const City *city_, int driver_) :
 	city{city_},
 	driver{driver_}
 {
-	requests.push_back(city->get_start_action(driver));
+	requests.push_back(city->get_start_action(driver)->get_index());
 }
 
 Route::Route(const Route &other) :
@@ -28,13 +28,6 @@ Route::Route(const Route &other) :
 }
 
 Route::~Route() {}
-
-bool Route::can_service_next(const Action* req) const
-{
-	const Action* last_action = get_last_action();
-	return operation_follows(last_action->get_operation(), req->get_operation())
-			&& follows_in_time(city, get_time_to_end(), last_action->get_location(), req);
-}
 
 void Route::service_next(const Action* req)
 {
@@ -56,7 +49,7 @@ const Action* Route::get_action(int index) const
 	if (index > (int) requests.size())
 	{
 		std::cout << "trying to get a action that is not in this route!" << std::endl;
-		exit(-1);
+		die();
 	}
 
 	return city->get_stop(requests.at(index));
@@ -109,13 +102,13 @@ const City* Route::get_city() const
 
 sh_time_t Route::get_time_to(const int max) const
 {
-	int location = city->get_start_location(driver);
+	location loc = city->get_start_action(driver)->get_location();
 	sh_time_t end_time = 0;
 	for (int i = 0; i < max; i++)
 	{
 		const Action* current = city->get_stop(requests.at(i));
-		end_time += get_time_taken(city, end_time, location, current);
-		location = current->get_location();
+		end_time = get_time_taken(city, end_time, loc, current);
+		loc = current->get_location();
 	}
 	return end_time;
 }
@@ -138,13 +131,10 @@ std::ostream& operator<<(std::ostream& os, const Route& r)
 	{
 		const Action* action = r.city->get_stop(r.requests.at(i));
 
-		sh_time_t ctime = r.get_time_to(i + 1);
-		sh_time_t otime = r.get_time_to(i);
-
-		os << "\t\t[" << std::setw(4) << i << " t=" << std::setw(5) << ctime;
+		os << "\t\t[" << std::setw(4) << i << " t=" << std::setw(5) << r.get_time_to(i);
 		if (i != 0)
 		{
-			os << " d=" << std::setw(5) << (ctime - otime);
+			os << " d=" << std::setw(5) << r.city->get_time_from(r.city->get_stop(r.requests.at(i-1))->get_location(), action->get_location());
 		}
 		else
 		{

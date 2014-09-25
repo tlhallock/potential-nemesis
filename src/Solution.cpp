@@ -10,6 +10,7 @@
 #include "model/Rules.h"
 
 #include <algorithm>
+#include <iomanip>
 
 Solution::Solution(const City *city_) :
 	city(city_),
@@ -20,6 +21,8 @@ Solution::Solution(const City *city_) :
 	{
 		routes.push_back(Route {city, i});
 	}
+
+	set_yards(city->get_staging_areas());
 }
 
 Solution::Solution(const Solution& other) :
@@ -31,6 +34,8 @@ Solution::Solution(const Solution& other) :
 	{
 		routes.push_back(Route {other.get_route(i)});
 	}
+
+	yards = other.yards;
 }
 
 Solution& Solution::operator =(const Solution& other)
@@ -38,13 +43,13 @@ Solution& Solution::operator =(const Solution& other)
 	if (city->get_num_stops() != other.city->get_num_stops())
 	{
 		puts("Assigning solution to different city!!!");
-		exit(-1);
+		die();
 	}
 	city = other.city;
 
 	int num_stops = city->get_num_stops();
 
-	for (int i=0;i<num_stops;i++)
+	for (int i = 0; i < num_stops; i++)
 	{
 		m_already_serviced[i] = other.m_already_serviced[i];
 	}
@@ -55,6 +60,8 @@ Solution& Solution::operator =(const Solution& other)
 	{
 		routes.push_back(Route {other.get_route(i)});
 	}
+
+	yards = other.yards;
 
 	return *this;
 }
@@ -105,7 +112,7 @@ Route& Solution::get_route(int index)
 	if (index > (int) routes.size())
 	{
 		std::cout << "Trying to get a route that doesn't exist!" << std::endl;
-		exit(-1);
+		die();
 	}
 
 	return routes.at(index);
@@ -126,14 +133,20 @@ std::ostream& operator<<(std::ostream& os, const Solution& r)
 		os << "Route [" << i << "]:\n" << r.get_route(i);
 	}
 
+	auto end = r.yards.end();
+	for (auto it = r.yards.begin(); it != end; ++it)
+	{
+		os << std::setw(5) << it->first << ": " << it->second << std::endl;
+	}
+
 	return os;
 }
 
 bool Solution::already_serviced(const Action *r) const
 {
-	return (r->get_operation() == Dump
-			|| r->get_operation() == Replace
-			|| r->get_operation() == PickUp)
+	return             r->get_operation() != Dump
+			&& r->get_operation() != Store
+			&& r->get_operation() != UnStore
 			&& m_already_serviced[r->get_index()];
 }
 
@@ -145,6 +158,7 @@ void Solution::loadXml(const tinyxml2::XMLDocument* document)
 	if (solution == nullptr)
 	{
 		std::cout << "No solution found!!!" << std::endl;
+		die();
 	}
 
 	const tinyxml2::XMLElement* routeXml = solution->FirstChildElement("route");
@@ -155,6 +169,8 @@ void Solution::loadXml(const tinyxml2::XMLDocument* document)
 
 		routeXml = routeXml->NextSiblingElement();
 	}
+
+	std::cout << "Still need to set already serviced and the yards..." << std::endl;
 }
 
 tinyxml2::XMLElement*  Solution::saveXml(tinyxml2::XMLDocument* document) const
@@ -179,13 +195,22 @@ tinyxml2::XMLElement*  Solution::saveXml(tinyxml2::XMLDocument* document) const
 
 bool Solution::service_next(int driver, const Action* action)
 {
-	if (!is_possible(city, this, routes.at(driver).get_time_to_end(), routes.at(driver).get_last_action(), action))
+	sh_time_t end_time;
+	if (!is_possible(city, this, driver, action, end_time, true))
 	{
 		std::cout << "Impossible state:\n" << *action << " from driver " << driver << " in \n" << *this << std::endl;
-		exit(-1);
+		die();
 		return false;
 	}
 	routes.at(driver).service_next(action);
+	m_already_serviced[action->get_index()] = true;
+
+//	auto it = yards.find(action->get_location());
+//	if (it != yards.end())
+//	{
+//		it->second.applied(action);
+//	}
+
 	return true;
 }
 
@@ -210,11 +235,21 @@ void Solution::validate()
 			if (ndx < 0 || ndx >= num_actions)
 			{
 				std::cout << "Invalid index at route " << route << " stop " << stop << " ndx = " << ndx << std::endl;
-				exit(-1);
+				die();
 			}
 			tst.service_next(route, city->get_stop(ndx));
 		}
 	}
 
 	std::cout << "The city is good!" << std::endl;
+}
+
+void Solution::set_yards(const std::map<const int, const StagingArea> other)
+{
+	yards.clear();
+	auto end = other.end();
+	for (auto it = other.begin(); it != end; ++it)
+	{
+		yards.insert(std::pair<int, StagingArea> { it->first, StagingArea{it->second} });
+	}
 }

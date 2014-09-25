@@ -13,13 +13,11 @@
 
 #include <vector>
 
-class Optimizer;
 class Solution;
 class City;
 
 class Route : public XmlObject
 {
-	friend class Optimizer;
 	friend class Solution;
 public:
 	Route(const City* city, int driver);
@@ -39,7 +37,6 @@ public:
 	const City* get_city() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const Route& r);
-
 	virtual void loadXml(const tinyxml2::XMLElement* element);
 	virtual tinyxml2::XMLElement* saveXml(tinyxml2::XMLElement* parent) const;
 private:

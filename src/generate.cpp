@@ -101,7 +101,7 @@ void generate_times(Operation o, sh_time_t &start_time, sh_time_t &stop_time)
 	if (o != Replace && o != DropOff)
 	{
 		std::cout << "We don't get here, do we?  21351351513327357" << std::endl;
-		exit(-1);
+		die();
 	}
 
 	if (rand() % 2 == 0)

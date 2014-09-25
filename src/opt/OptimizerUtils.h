@@ -20,9 +20,15 @@ int random_decreasing_probability(int max, double rate = .9);
 const Action* get_close(const City* city, location l,  std::vector<const Action* > *possibles);
 
 
-void get_necessary_actions(const City &city, Solution *s, sh_time_t start_time,
-		const Action* prev_action, const Action* next_request,
-		std::vector<const Action*> &outparam, sh_time_t& outtime,
-		const operation_location_constraint& constraints);
+ void get_best_intermediate(
+			const City &city,
+			Solution *s,
+			int driver,
+			int to,
+
+			const operation_location_constraint& constraints,
+
+			std::vector<int>& outparam,
+			sh_time_t& outtime);
 
 #endif /* OPTIMIZER_H_ */

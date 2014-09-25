@@ -35,5 +35,8 @@ typedef int location;
 
 
 
+void die();
+
+
 
 #endif /* COMMON_H_ */

@@ -94,16 +94,114 @@ inline bool operation_follows(Operation prev_operation, Operation next_operation
 
 bool is_possible(const City* city,
 		const Solution * s,
+		int driver,
+		const Action* action,
+		sh_time_t &end_time,
+		bool verbose)
+{
+	sh_time_t start_time = s->get_route(driver).get_time_to_end();
+	const Action* prev_action = s->get_route(driver).get_last_action();
+
+	return is_possible(city, s, start_time, prev_action, action, end_time, verbose);
+}
+
+bool is_possible(const City* city,
+		const Solution * s,
+		int driver,
+		std::vector<int> intermediates,
+		sh_time_t& out_time,
+		bool verbose)
+{
+	int nints = intermediates.size();
+
+	const Action* prev_action;
+	const Action* next_action = s->get_route(driver).get_last_action();
+
+	for (int i = 0; i < nints; i++)
+	{
+		for (int j = 0; j < nints; j++)
+		{
+			if (i != j && intermediates.at(i) == intermediates.at(j))
+			{
+				return false;
+			}
+		}
+	}
+
+	out_time = sh_time_max;
+	sh_time_t start_time = s->get_route(driver).get_time_to_end();
+
+	int size = intermediates.size();
+	for (int i = 0; i < size; i++)
+	{
+		prev_action = next_action;
+		next_action = city->get_stop(intermediates.at(i));
+
+		if (!is_possible(city, s, start_time, prev_action, next_action, out_time, verbose))
+		{
+			return false;
+		}
+
+		start_time = out_time;
+	}
+	return true;
+}
+
+bool is_possible(const City* city,
+		const Solution * s,
 		const sh_time_t start_time,
 		const Action* prev_action,
-		const Action* action)
+		const Action* next_action,
+		sh_time_t &out_time,
+		bool verbose)
 {
-	return          start_time < sh_time_look_ahead
-			&& operation_follows(prev_action->get_operation(), action->get_operation())
-			&& follows_in_time(city, start_time, prev_action->get_location(), action)
-			&& !s->already_serviced(action)
-			&& sizes_match(prev_action, action);
+	out_time = get_time_taken(city, start_time, prev_action->get_location(), next_action);
+
+//	if (out_time > sh_time_look_ahead)
+//	{
+//		if (verbose)
+//		{
+//			std::cout << "past last possible time" << std::endl;
+//		}
+//		return false;
+//	}
+	if (!operation_follows(prev_action->get_operation(), next_action->get_operation()))
+	{
+		if (verbose)
+		{
+			std::cout << "operations do not follow" << std::endl;
+		}
+		return false;
+	}
+	if (!follows_in_time(out_time,  next_action))
+	{
+		if (verbose)
+		{
+			std::cout << "bad time" << std::endl;
+		}
+		return false;
+	}
+	if (s->already_serviced(next_action))
+	{
+		if (verbose)
+		{
+			std::cout << "already serviced" << std::endl;
+		}
+//			std::cout << "\n already serviced = " << next_action->get_index() << std::endl;
+		return false;
+	}
+	if (!sizes_match(prev_action, next_action))
+	{
+		if (verbose)
+		{
+			std::cout << "wrong size" << std::endl;
+		}
+		return false;
+	}
+
+	return true;
 }
+
 
 std::vector<const Action*>* get_possibles(
 		const Solution *s,
@@ -123,7 +221,9 @@ std::vector<const Action*>* get_possibles(
 //		std::cout << "Prev " << *prev_action.get() << std::endl;
 //		std::cout << "Consider " << *action.get() << std::endl;
 
-		if (is_possible(&city, s, start_time, prev_action, possible))
+		sh_time_t end_time;
+
+		if (is_possible(&city, s, start_time, prev_action, possible, end_time))
 		{
 			actions->push_back(possible);
 		}
@@ -136,7 +236,9 @@ std::vector<const Action*>* get_possibles(
 sh_time_t get_time_taken(const City *city, sh_time_t start_time, location from, const Action* to)
 {
 	sh_time_t end_time = start_time;
+
 	end_time += city->get_time_from(from, to->get_location());
+
 	if (end_time < to->get_minimum_time())
 	{
 		end_time = to->get_minimum_time();
@@ -146,13 +248,12 @@ sh_time_t get_time_taken(const City *city, sh_time_t start_time, location from, 
 	return end_time;
 }
 
-bool follows_in_time(const City *city, sh_time_t start_time, location from, const Action* to)
+bool follows_in_time(const sh_time_t end_time, const Action* to)
 {
-	sh_time_t time = get_time_taken(city, start_time, from, to);
 	return
 #if 0
-			time > to->get_minimum_time() &&
+			end_time > to->get_minimum_time() &&
 #endif
-			time < to->get_maximum_time();
+			end_time < to->get_maximum_time();
 }
 

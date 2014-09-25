@@ -40,9 +40,13 @@ public:
 
 	void validate();
 private:
+	void set_yards(const std::map<const int, const StagingArea> other);
+
 	const City* city;
 	std::vector<Route> routes;
 
+	// looking up this maps takes up 16% of the time...
+	std::map<int, StagingArea> yards;
 	bool *m_already_serviced;
 };
 
